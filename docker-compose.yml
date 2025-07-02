@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:17
+    ports:
+      - "5400:5432"
+    environment:
+      POSTGRES_USER: ilya
+      POSTGRES_PASSWORD: ilya
+      POSTGRES_DB: contractorDb
+    
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL:      jdbc:postgresql://db:5432/contractorDb
+      SPRING_DATASOURCE_USERNAME: ilya
+      SPRING_DATASOURCE_PASSWORD: ilya
+      SERVER_PORT: "8082"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
