@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetContactorByIdDto {
+
     private String id;
     private String parentId;
     private String name;
@@ -45,4 +46,5 @@ public class GetContactorByIdDto {
         private Integer id;
         private String name;
     }
+
 }

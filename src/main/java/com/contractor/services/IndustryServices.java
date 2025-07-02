@@ -7,34 +7,55 @@ import com.contractor.model.Industry;
 import com.contractor.repository.IndustryRepositiry;
 import lombok.AllArgsConstructor;
 
-
+/**
+ * this is service to manage db
+ */
 @Service
 @AllArgsConstructor
 public class IndustryServices {
-    
+
     private final IndustryRepositiry industryRepositiry;
 
     private final JdbcTemplate jdbcTemplate;
 
-    public List<Industry> getAllIndictry(){
+    /**
+     * find all industry
+     * @return list of industry object
+     */
+    public List<Industry> getAllIndictry() {
         return industryRepositiry.findAll();
     }
 
-    public Industry getIndustryById(Integer id){
+    /**
+     * find indestry by id
+     * @param id of industry
+     * @return industry object
+     */
+    public Industry getIndustryById(Integer id) {
         return industryRepositiry.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Industry not found"));
     }
 
-    public Industry saveIndustry(Industry industry){
+    /**
+     * save new industry
+     * @param industry object
+     * @return save industry
+     */
+    public Industry saveIndustry(Industry industry) {
         return industryRepositiry.save(industry);
     }
 
-    public void deleteIndustry(Integer id){
+    /**
+     * verify is_active industry become false
+     * and verify is_actieve related contractors become false
+     * @param id of industry
+     */
+    public void deleteIndustry(Integer id) {
 
         jdbcTemplate.update("UPDATE industry SET is_active = false WHERE id = ?", id);
 
         jdbcTemplate.update("UPDATE contractor SET is_active = false WHERE country = ?", id);
-        
+
     }
 
 }

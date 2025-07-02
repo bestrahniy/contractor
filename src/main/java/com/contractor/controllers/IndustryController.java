@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @AllArgsConstructor
 @RequestMapping("/industry")
 public class IndustryController {
-    
+
     private final IndustryServices industryServices;
 
     /**
@@ -34,7 +34,7 @@ public class IndustryController {
     public ResponseEntity<List<Industry>> getAllindictry() {
         return ResponseEntity.ok(industryServices.getAllIndictry());
     }
-    
+
     /**
      * get industry by id
      * @param id of industry
@@ -44,7 +44,7 @@ public class IndustryController {
     public ResponseEntity<Industry> getIndustryById(@PathVariable Integer id) {
         return ResponseEntity.ok(industryServices.getIndustryById(id));
     }
-    
+
     /**
      * connect to saveIndustry method from indestry service
      * for save new country
@@ -52,7 +52,7 @@ public class IndustryController {
      * @return http status
      */
     @PutMapping("/save")
-    public ResponseEntity<Industry> saveIndustry(@RequestBody SaveIndustryDto saveIndustryDto){
+    public ResponseEntity<Industry> saveIndustry(@RequestBody SaveIndustryDto saveIndustryDto) {
         Industry industry = new Industry();
         industry.setId(saveIndustryDto.getId());
         industry.setName(saveIndustryDto.getName());
@@ -67,8 +67,9 @@ public class IndustryController {
      * @return http status
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteIndustry(@PathVariable Integer id){
+    public ResponseEntity<?> deleteIndustry(@PathVariable Integer id) {
         industryServices.deleteIndustry(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
 }

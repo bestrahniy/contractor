@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SaveCountryDto {
-    
+
     private String id;
 
     private String name;
-    
+
 }

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.contractor.DTO.GetContactorByIdDto;
 import com.contractor.DTO.GetPaginationDto;
@@ -22,10 +23,11 @@ import org.springframework.web.bind.annotation.PostMapping;
  * that is controller for contractors
  * this class defines endpoint and connect with ContractorsRepository
  */
-@RestController("/contractor")
+@RestController()
+@RequestMapping("/contactor")
 @AllArgsConstructor
 public class ContractorContollers {
-    
+
     private final ContractorServices contractorServices;
 
     /**
@@ -67,7 +69,7 @@ public class ContractorContollers {
     }
 
     /**
-     * connect to deleteContractorById method to 
+     * connect to deleteContractorById method to
      * do logical deletion contructor by id
      * @param id of contactor
      * @return http status
@@ -87,21 +89,20 @@ public class ContractorContollers {
      */
     @GetMapping("/all/{page}/{size}")
     public ResponseEntity<List<GetPaginationDto>> getAllContractor(
-        @PathVariable Integer page, @PathVariable Integer size){
+        @PathVariable Integer page, @PathVariable Integer size) {
         return ResponseEntity.ok(contractorServices.getAllContractorPagination(1, 10));
     }
-    
+
     /**
      * post method to connect searchContractor method from
      * contractorService to get all contracotr by filter
-     * @param searchContravtorRequestDto dto for search 
-     * @return https status 
+     * @param searchContravtorRequestDto dto for search
+     * @return https status
      */
     @PostMapping("/search")
     public ResponseEntity<List<GetPaginationDto>> postMethodName(
         @RequestBody SearchContravtorRequestDto searchContravtorRequestDto) {
         return ResponseEntity.ok(contractorServices.searchContractors(searchContravtorRequestDto, 10, 1));
     }
-    
-    
+
 }

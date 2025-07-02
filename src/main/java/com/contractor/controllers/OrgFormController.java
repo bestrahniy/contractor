@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/orgform")
 @RestController
 public class OrgFormController {
-    
+
     private final OrgFormService orgFormService;
 
     /**
@@ -34,24 +34,24 @@ public class OrgFormController {
     public ResponseEntity<List<OrgForm>> getAllOrgForm() {
         return ResponseEntity.ok(orgFormService.giveAllOrgForm());
     }
-    
+
     /**
      * get org form by id
      * @param id of org form
      * @return http status
      */
     @GetMapping("/{id}")
-    public ResponseEntity<OrgForm> getOrgFormById(@PathVariable Integer id){
+    public ResponseEntity<OrgForm> getOrgFormById(@PathVariable Integer id) {
         return ResponseEntity.ok(orgFormService.giveOrgFormById(id));
     }
 
     /**
-     * variable is_active becomes false 
+     * variable is_active becomes false
      * @param id of org form
      * @return http status
      */
     @GetMapping("/delete/{id}")
-    public ResponseEntity<?> deleteOrgForm(@PathVariable Integer id){
+    public ResponseEntity<?> deleteOrgForm(@PathVariable Integer id) {
         orgFormService.deleteOrgForm(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -63,7 +63,7 @@ public class OrgFormController {
      * @return http status
      */
     @PutMapping("save")
-    public ResponseEntity<OrgForm> saveOrgForm(@RequestBody SaveOrgFormDto saveOrgFormDto){
+    public ResponseEntity<OrgForm> saveOrgForm(@RequestBody SaveOrgFormDto saveOrgFormDto) {
         OrgForm orgForm = new OrgForm();
         orgForm.setId(saveOrgFormDto.getId());
         orgForm.setName(saveOrgFormDto.getName());
@@ -71,5 +71,5 @@ public class OrgFormController {
         OrgForm saved = orgFormService.saveOrgForm(orgForm);
         return ResponseEntity.ok(saved);
     }
-    
+
 }

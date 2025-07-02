@@ -11,10 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SaveOrgFormDto {
-    
+
     private Integer id;
 
     private String name;
 
     private boolean isActive;
+
 }

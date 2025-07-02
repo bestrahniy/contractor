@@ -36,13 +36,13 @@ public class ContractorServices {
     private final JdbcTemplate jdbcTemplate;
 
     /**
-     * checkeng all related entity if 
+     * checkeng all related entity if
      * at least one entity is missing object will not save
      * @param contractor object
      * @return save contractor
      */
     @Transactional
-    public Contractor saveContractor(Contractor contractor){
+    public Contractor saveContractor(Contractor contractor) {
         countryRepository.findById(contractor.getCountry())
             .orElseThrow(() -> new IllegalArgumentException("Country not found"));
 
@@ -67,10 +67,10 @@ public class ContractorServices {
      * @return dto for showing contractor
      */
     @Transactional
-    public GetContactorByIdDto getContractorById(String id){
+    public GetContactorByIdDto getContractorById(String id) {
         Contractor contractor = contractorRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Contructor not found"));
-        
+
         Country country = countryRepository.findById(contractor.getCountry())
             .orElseThrow(() -> new IllegalArgumentException("Country not found"));
 
@@ -107,22 +107,23 @@ public class ContractorServices {
      * @param id of contractor
      */
     @Transactional
-    public void deleteContractorById(String id){
+    public void deleteContractorById(String id) {
         Contractor contractor = contractorRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("contractor not found"));
-        
+
         contractor.setActive(false);
         contractorRepository.save(contractor);
     }
 
     /**
-     * 
+     * using pagination for show object to screen by
+     * use LIMIT OFFSET in sql response
      * @param page count
      * @param size count object on screen
-     * @return
+     * @return List of entity
      */
     @Transactional
-    public List<GetPaginationDto> getAllContractorPagination(int page, int size){
+    public List<GetPaginationDto> getAllContractorPagination(int page, int size) {
 
         int lasElem = page * size;
 
@@ -145,16 +146,24 @@ public class ContractorServices {
     }
 
 
+    /**
+     * this method create a sql query for searching Object
+     * by custom filter, it add custom filter into main sql and
+     * ready sql is execute, getting data show on screen using pagination
+     * @param searchContravtorRequestDto dto with params for searching
+     * @param size max count object on screen
+     * @param page count page
+     * @return list of entity
+     */
     @Transactional
     public List<GetPaginationDto> searchContractors(
-            SearchContravtorRequestDto searchContravtorRequestDto, 
-            Integer size, 
-            Integer page
-        ){
+            SearchContravtorRequestDto searchContravtorRequestDto,
+            Integer size,
+            Integer page) {
 
         StringBuilder sql = new StringBuilder("SELECT * FROM contractor " +
                                         "FULL JOIN country ON contractor.country = country.id " +
-                                        "FULL JOIN industry ON contractor.industry = industry.id " + 
+                                        "FULL JOIN industry ON contractor.industry = industry.id " +
                                         "FULL JOIN org_form ON contractor.org_form = org_form.id " +
                                         "WHERE country.is_active = true");
         List<Object> param = new ArrayList<>();
@@ -162,20 +171,20 @@ public class ContractorServices {
         if (searchContravtorRequestDto.getId() != null) {
             sql.append(" AND contractor.id = ?");
             param.add(searchContravtorRequestDto.getId());
-        } 
+        }
         if (searchContravtorRequestDto.getParentId() != null) {
             sql.append(" AND contractor.parent_id = ?");
             param.add(searchContravtorRequestDto.getParentId());
-        } 
-        if (searchContravtorRequestDto.getName() != null|| 
+        }
+        if (searchContravtorRequestDto.getName() != null ||
             searchContravtorRequestDto.getInn() != null ||
             searchContravtorRequestDto.getNameFull() != null ||
             searchContravtorRequestDto.getOgrn() != null) {
             sql.append(" AND (LOWER(contractor.name) LIKE ?" +
-                        " OR LOWER(contractor.name_full) LIKE ?" + 
-                        " OR LOWER(contractor.inn) LIKE ?" + 
+                        " OR LOWER(contractor.name_full) LIKE ?" +
+                        " OR LOWER(contractor.inn) LIKE ?" +
                         " OR LOWER(contractor.ogrn) LIKE ?");
-            String termName = "%"+ (searchContravtorRequestDto.getName()).toString().toLowerCase() + "%";
+            String termName = "%" + (searchContravtorRequestDto.getName()).toString().toLowerCase() + "%";
             String termInn = "%" + (searchContravtorRequestDto.getInn()).toString().toLowerCase() + "%";
             String termNameFull = "%" + (searchContravtorRequestDto.getNameFull()).toString().toLowerCase() + "%";
             String termOgrn = "%" + (searchContravtorRequestDto.getOgrn()).toString().toLowerCase() + "%";
@@ -186,7 +195,7 @@ public class ContractorServices {
         }
         if (searchContravtorRequestDto.getCountry() != null) {
             sql.append(" AND LOWER(country.name) LIKE ?");
-            param.add("%"+searchContravtorRequestDto.getCountry().toLowerCase()+"%");
+            param.add("%" + searchContravtorRequestDto.getCountry().toLowerCase() + "%");
         }
 
         if (searchContravtorRequestDto.getIndustry() != null) {
@@ -194,7 +203,7 @@ public class ContractorServices {
             param.add(searchContravtorRequestDto.getIndustry());
         }
 
-        if(searchContravtorRequestDto.getOrgForm() != null) {
+        if (searchContravtorRequestDto.getOrgForm() != null) {
             sql.append(" AND LOWER(org_form.name) LIKE ?");
             param.add("%" + searchContravtorRequestDto.getOrgForm().toLowerCase() + "%");
         }
@@ -219,4 +228,5 @@ public class ContractorServices {
 
         return list;
     }
+
 }

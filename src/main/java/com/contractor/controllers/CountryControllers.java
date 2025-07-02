@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/country")
 @AllArgsConstructor
 public class CountryControllers {
-    
+
     private final CountryServices countryServices;
 
     /**
@@ -33,7 +33,7 @@ public class CountryControllers {
      * @return http status
      */
     @PutMapping("/save")
-    public ResponseEntity<Country> saveCountry(@RequestBody SaveCountryDto saveCountryDto){
+    public ResponseEntity<Country> saveCountry(@RequestBody SaveCountryDto saveCountryDto) {
         Country country = new Country();
         country.setId(saveCountryDto.getId());
         country.setName(saveCountryDto.getName());
@@ -58,7 +58,7 @@ public class CountryControllers {
      * @return http status
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCountryById(@PathVariable String id){
+    public ResponseEntity<?> getCountryById(@PathVariable String id) {
         return ResponseEntity.ok(countryServices.getCountryById(id));
     }
 
@@ -68,9 +68,9 @@ public class CountryControllers {
      * @return http status
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteCountryById(@PathVariable String id){
+    public ResponseEntity<?> deleteCountryById(@PathVariable String id) {
         countryServices.deleteCountryById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-    
+
 }

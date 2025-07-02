@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetPaginationDto {
-    
+
     private String id;
 
     private String parentId;

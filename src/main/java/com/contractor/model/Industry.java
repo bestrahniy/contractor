@@ -7,13 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("industry")
 public class Industry {
-    
+
     @Id
     @Column("id")
     private Integer id;

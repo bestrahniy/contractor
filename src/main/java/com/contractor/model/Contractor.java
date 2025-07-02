@@ -8,13 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Table(name = "contractor")
 public class Contractor {
-    
+
     @Id
     @Column("id")
     private String id;

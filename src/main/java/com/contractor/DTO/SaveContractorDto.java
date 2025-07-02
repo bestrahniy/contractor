@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SaveContractorDto {
+
     private String id;
     private String parentId;
     private String name;
@@ -20,4 +21,5 @@ public class SaveContractorDto {
     private String country;
     private Integer industry;
     private Integer orgForm;
+
 }

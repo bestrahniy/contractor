@@ -5,13 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * dto for sending castoming variable to filter costumer 
+ * dto for sending castoming variable to filter costumer
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchContravtorRequestDto {
-    
+
     private String id;
 
     private String parentId;

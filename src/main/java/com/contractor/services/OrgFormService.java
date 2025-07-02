@@ -7,31 +7,52 @@ import com.contractor.model.OrgForm;
 import com.contractor.repository.OrgFormRepository;
 import lombok.AllArgsConstructor;
 
-
+/**
+ * this is service to manage org_form db
+ */
 @Service
 @AllArgsConstructor
 public class OrgFormService {
-    
+
     private final OrgFormRepository orgFormRepository;
 
     private final JdbcTemplate jdbcType;
 
-    public List<OrgForm> giveAllOrgForm(){
+    /**
+     * get all org form
+     * @return list of org form object
+     */
+    public List<OrgForm> giveAllOrgForm() {
         return orgFormRepository.findAll();
     }
 
-    public OrgForm giveOrgFormById(Integer id){
+    /**
+     * find org form by id
+     * @param id org form
+     * @return org form object
+     */
+    public OrgForm giveOrgFormById(Integer id) {
         return orgFormRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("org form not found"));
     }
 
-    public void deleteOrgForm(Integer id){
+    /**
+     * verify is_active org form become false
+     * and verify is_actieve related contractors become false
+     * @param id of orf form
+     */
+    public void deleteOrgForm(Integer id) {
         jdbcType.update("UPDATE org_form SET is_active = false WHERE id = ?", id);
         jdbcType.update("UPDATE  contractor SET is_active = false WHERE org_form = ?", id);
     }
 
-
-    public OrgForm saveOrgForm(OrgForm orgForm){
+    /**
+     * save new org form
+     * @param orgForm object
+     * @return save org form
+     */
+    public OrgForm saveOrgForm(OrgForm orgForm) {
         return orgFormRepository.save(orgForm);
     }
+
 }
