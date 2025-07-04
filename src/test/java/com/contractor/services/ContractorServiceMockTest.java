@@ -1,4 +1,4 @@
-package com.contractor;
+package com.contractor.services;
 
 
 import static org.junit.Assert.*;
@@ -29,7 +29,7 @@ import com.contractor.services.ContractorServices;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class ContractorServiceTest {
+public class ContractorServiceMockTest {
     
     @Mock
     ContractorRepository contractorRepository;
@@ -82,6 +82,9 @@ public class ContractorServiceTest {
         when(contractorRepository.save(tesContractor))
             .thenReturn(tesContractor);
 
+        when(contractorRepository.existsById(tesContractor.getId()))
+            .thenReturn(true);
+
         Contractor resultSave = services.saveContractor(tesContractor);
 
         assertEquals("ABH", resultSave.getCountry());
@@ -101,6 +104,9 @@ public class ContractorServiceTest {
         when(orgFormRepository.findById(1))
             .thenReturn(Optional.of(new OrgForm(1, "-", true))
         );
+                
+        when(contractorRepository.existsById(tesContractor.getId()))
+            .thenReturn(true);
 
         when(contractorRepository.findById("C1"))
             .thenReturn(Optional.of(tesContractor));

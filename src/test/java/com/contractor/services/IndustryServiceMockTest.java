@@ -1,6 +1,7 @@
-package com.contractor;
+package com.contractor.services;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import com.contractor.services.IndustryServices;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class IndustryTest {
+public class IndustryServiceMockTest {
     
     @Mock
     IndustryRepositiry industryRepositiry;
@@ -57,10 +58,16 @@ public class IndustryTest {
     public void deleteIndustryTest(){
         industryRepositiry.save(testIndustry);
         industryServices.deleteIndustry(51);
+
+        when(jdbcTemplate.queryForObject(anyString(), eq(Boolean.class)))
+            .thenReturn(false);
+
         Boolean type = jdbcTemplate.queryForObject("SELECT is_active FROM industry", Boolean.class);
-        assertEquals(false, false);
-        verify(jdbcTemplate).update("UPDATE industry SET is_active = false WHERE id = ?", 51);
-        verify(jdbcTemplate).update("UPDATE contractor SET is_active = false WHERE country = ?", 51);
+
+        assertEquals(false, type);
+        
+        verify(jdbcTemplate).update("UPDATE industry SET is_active = false WHERE id = ?", testIndustry.getId());
+        verify(jdbcTemplate).update("UPDATE contractor SET is_active = false WHERE industry = ?", testIndustry.getId());
     }
 
     @Test
