@@ -32,8 +32,14 @@ public class IndustryServices {
      * @return industry object
      */
     public Industry getIndustryById(Integer id) {
-        return industryRepositiry.findById(id)
+        Industry industry = industryRepositiry.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Industry not found"));
+
+        if (!industry.isActive()) {
+            throw new IllegalArgumentException("Industry is not active");
+        }
+
+        return industry;
     }
 
     /**
@@ -54,7 +60,7 @@ public class IndustryServices {
 
         jdbcTemplate.update("UPDATE industry SET is_active = false WHERE id = ?", id);
 
-        jdbcTemplate.update("UPDATE contractor SET is_active = false WHERE country = ?", id);
+        jdbcTemplate.update("UPDATE contractor SET is_active = false WHERE industry = ?", id);
 
     }
 

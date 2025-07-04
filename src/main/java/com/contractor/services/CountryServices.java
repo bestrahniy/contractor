@@ -1,6 +1,8 @@
 package com.contractor.services;
 
 import java.util.List;
+
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,8 @@ public class CountryServices {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final JdbcAggregateTemplate jdbcAggregateTemplate;
+
     /**
      * save new country
      * @param country object
@@ -26,7 +30,12 @@ public class CountryServices {
      */
     @Transactional
     public Country saveCountry(Country country) {
-        return countryRepository.save(country);
+        Boolean exists = countryRepository.existsById(country.getId());
+        if (exists) {
+            return countryRepository.save(country);
+        } else {
+            return jdbcAggregateTemplate.insert(country);
+        }
     }
 
     /**
@@ -45,8 +54,14 @@ public class CountryServices {
      */
     @Transactional
     public Country getCountryById(String id) {
-        return countryRepository.findById(id)
+        Country country = countryRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("country not found"));
+
+        if (!country.isActive()) {
+            throw new IllegalArgumentException("country is not active");
+        }
+
+        return country;
     }
 
     /**

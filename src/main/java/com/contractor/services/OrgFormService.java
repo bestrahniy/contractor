@@ -32,8 +32,14 @@ public class OrgFormService {
      * @return org form object
      */
     public OrgForm giveOrgFormById(Integer id) {
-        return orgFormRepository.findById(id)
+        OrgForm orgForm = orgFormRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("org form not found"));
+
+        if (!orgForm.isActive()) {
+            throw new IllegalArgumentException("org form is not active");
+        }
+
+        return orgForm;
     }
 
     /**

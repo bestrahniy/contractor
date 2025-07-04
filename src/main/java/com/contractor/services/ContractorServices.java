@@ -2,6 +2,8 @@ package com.contractor.services;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,8 @@ public class ContractorServices {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final JdbcAggregateTemplate jdbcAggregateTemplate;
+
     /**
      * checkeng all related entity if
      * at least one entity is missing object will not save
@@ -57,7 +61,14 @@ public class ContractorServices {
                 .orElseThrow(() -> new IllegalArgumentException("Parent contractor not found"));
         }
 
-        return contractorRepository.save(contractor);
+        boolean exist = contractorRepository.existsById(contractor.getId());
+
+        if (exist) {
+            return contractorRepository.save(contractor);
+        } else {
+            return jdbcAggregateTemplate.insert(contractor);
+        }
+
     }
 
     /**
@@ -79,6 +90,10 @@ public class ContractorServices {
 
         OrgForm orgForm = orgFormRepository.findById(contractor.getOrgForm())
             .orElseThrow(() -> new IllegalArgumentException("org form not found"));
+
+        if (!contractor.isActive()) {
+            throw new IllegalArgumentException("contractor is not active");
+        }
 
         return new GetContactorByIdDto(
             contractor.getId(),
@@ -128,7 +143,7 @@ public class ContractorServices {
         int lasElem = page * size;
 
         String sql = "SELECT id, parent_id, name, name_full, inn, ogrn, country, industry, org_form "
-            + " FROM contractor ORDER BY id LIMIT ? OFFSET ?";
+            + " FROM contractor id LIMIT ? OFFSET ?";
 
         return jdbcTemplate.query(sql, new Object[]{size, lasElem}, (result, strNumber) -> {
             GetPaginationDto contractor = new GetPaginationDto();
@@ -176,22 +191,25 @@ public class ContractorServices {
             sql.append(" AND contractor.parent_id = ?");
             param.add(searchContravtorRequestDto.getParentId());
         }
-        if (searchContravtorRequestDto.getName() != null ||
-            searchContravtorRequestDto.getInn() != null ||
-            searchContravtorRequestDto.getNameFull() != null ||
-            searchContravtorRequestDto.getOgrn() != null) {
-            sql.append(" AND (LOWER(contractor.name) LIKE ?" +
-                        " OR LOWER(contractor.name_full) LIKE ?" +
-                        " OR LOWER(contractor.inn) LIKE ?" +
-                        " OR LOWER(contractor.ogrn) LIKE ?");
-            String termName = "%" + (searchContravtorRequestDto.getName()).toString().toLowerCase() + "%";
-            String termInn = "%" + (searchContravtorRequestDto.getInn()).toString().toLowerCase() + "%";
-            String termNameFull = "%" + (searchContravtorRequestDto.getNameFull()).toString().toLowerCase() + "%";
-            String termOgrn = "%" + (searchContravtorRequestDto.getOgrn()).toString().toLowerCase() + "%";
-            param.add(termName);
-            param.add(termNameFull);
-            param.add(termInn);
-            param.add(termOgrn);
+        if (searchContravtorRequestDto.getName() != null) {
+            sql.append(" AND LOWER(contractor.name) LIKE ?");
+            String term = "%" + searchContravtorRequestDto.getName().toLowerCase() + "%";
+            param.add(term);
+        }
+        if (searchContravtorRequestDto.getNameFull() != null) {
+            sql.append(" AND LOWER(contractor.name_full) LIKE ?");
+            String term = "%" + searchContravtorRequestDto.getNameFull().toLowerCase() + "%";
+            param.add(term);
+        }
+        if (searchContravtorRequestDto.getInn() != null) {
+            sql.append(" AND contracotr.inn LIKE ?");
+            String term = "%" + searchContravtorRequestDto.getInn().toLowerCase() + "%";
+            param.add(term);
+        }
+        if (searchContravtorRequestDto.getOgrn() != null) {
+            sql.append(" AND contractor.ogrn LIKE ?");
+            String term = "%" + searchContravtorRequestDto.getOgrn().toLowerCase() + "%";
+            param.add(term);
         }
         if (searchContravtorRequestDto.getCountry() != null) {
             sql.append(" AND LOWER(country.name) LIKE ?");
