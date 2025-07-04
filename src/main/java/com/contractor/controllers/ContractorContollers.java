@@ -13,6 +13,11 @@ import com.contractor.DTO.SaveContractorDto;
 import com.contractor.DTO.SearchContravtorRequestDto;
 import com.contractor.model.Contractor;
 import com.contractor.services.ContractorServices;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +28,10 @@ import org.springframework.web.bind.annotation.PostMapping;
  * that is controller for contractors
  * this class defines endpoint and connect with ContractorsRepository
  */
+@Tag(name = "contractor api",
+    description = "manage contractor")
 @RestController()
-@RequestMapping("/contactor")
+@RequestMapping("/contractor")
 @AllArgsConstructor
 public class ContractorContollers {
 
@@ -36,8 +43,18 @@ public class ContractorContollers {
      * @param saveContractorDto dto for save new contractor
      * @return http status
      */
+    @Operation(
+        summary = "save a new contractor",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "created a new contractor"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+            @ApiResponse(responseCode = "409", description = "contractor already exists"),
+            @ApiResponse(responseCode = "500", description = "server is badly")
+        }
+    )
     @PutMapping("/save")
-    public ResponseEntity<String> saveContructor(@RequestBody SaveContractorDto saveContractorDto) {
+    public ResponseEntity<String> saveContructor(
+        @RequestBody SaveContractorDto saveContractorDto) {
         Contractor contractor = new Contractor();
         contractor.setId(saveContractorDto.getId());
         contractor.setParentId(saveContractorDto.getParentId());
@@ -62,8 +79,24 @@ public class ContractorContollers {
      * @param id of contructor
      * @return http satatus
      */
+    @Operation(
+        summary = "get one contractor by id",
+        description = "return all contractor data and related entity",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "contractor was found"),
+            @ApiResponse(responseCode = "404", description = "contractor not found"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+        }
+    )
     @GetMapping("/{id}")
-    public ResponseEntity<GetContactorByIdDto> getContructorById(@PathVariable String id) {
+    public ResponseEntity<GetContactorByIdDto> getContructorById(
+        @Parameter(
+            description = """
+                    unique id of costomer
+                    """,
+            example = "id1"
+        )
+        @PathVariable String id) {
         GetContactorByIdDto getContractor = contractorServices.getContractorById(id);
         return ResponseEntity.ok(getContractor);
     }
@@ -74,8 +107,26 @@ public class ContractorContollers {
      * @param id of contactor
      * @return http status
      */
+    @Operation(
+        summary = "logical deletion contractor by id",
+        description = """
+                        update variable is_active from contractor table to
+                        false for logical deletion
+                                """,
+        responses = {
+            @ApiResponse(responseCode = "204", description = "logical delete is successful"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+            @ApiResponse(responseCode = "404", description = "contractor not found"),
+            @ApiResponse(responseCode = "500", description = "server is badly")
+        }
+    )
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteContractor(@PathVariable String id) {
+    public ResponseEntity<?> deleteContractor(
+        @Parameter(
+            description = "unique id of contractor",
+            example = "id1"
+        )
+        @PathVariable String id) {
         contractorServices.deleteContractorById(id);
         return ResponseEntity.noContent().build();
     }
@@ -87,10 +138,32 @@ public class ContractorContollers {
      * @param size number
      * @return http status
      */
+    @Operation(
+        summary = "give all contractor",
+        description = "schow all contractor using pagination",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "contractor showed to screen"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+            @ApiResponse(responseCode = "404", description = "contractor not found"),
+            @ApiResponse(responseCode = "500", description = "server is badly")
+        }
+    )
     @GetMapping("/all/{page}/{size}")
     public ResponseEntity<List<GetPaginationDto>> getAllContractor(
-        @PathVariable Integer page, @PathVariable Integer size) {
-        return ResponseEntity.ok(contractorServices.getAllContractorPagination(1, 10));
+        @Parameter(
+            description = """
+                    count of page, min value = 0
+                    """,
+            example = "0")
+        @PathVariable Integer page,
+
+        @Parameter(
+            description = """
+                    count of size, min value = 1
+                    """,
+            example = "1")
+        @PathVariable Integer size) {
+        return ResponseEntity.ok(contractorServices.getAllContractorPagination(page, size));
     }
 
     /**
@@ -99,10 +172,19 @@ public class ContractorContollers {
      * @param searchContravtorRequestDto dto for search
      * @return https status
      */
+    @Operation(
+        summary = "get all contractor by filter",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "contractor showed on screen"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+            @ApiResponse(responseCode = "404", description = "contractor nor found"),
+            @ApiResponse(responseCode = "500", description = "serever if badly")
+        }
+    )
     @PostMapping("/search")
     public ResponseEntity<List<GetPaginationDto>> postMethodName(
         @RequestBody SearchContravtorRequestDto searchContravtorRequestDto) {
-        return ResponseEntity.ok(contractorServices.searchContractors(searchContravtorRequestDto, 10, 1));
+        return ResponseEntity.ok(contractorServices.searchContractors(searchContravtorRequestDto, 10, 0));
     }
 
 }

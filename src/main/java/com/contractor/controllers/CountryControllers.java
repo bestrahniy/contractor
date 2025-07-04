@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.contractor.DTO.SaveCountryDto;
 import com.contractor.model.Country;
 import com.contractor.services.CountryServices;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * that is controller for country
  * is define endpoins of class country
  */
+@Tag(
+    name = "country api",
+    description = "manage country and all related entity"
+)
 @RestController
 @RequestMapping("/country")
 @AllArgsConstructor
@@ -32,8 +40,19 @@ public class CountryControllers {
      * @param saveCountryDto dto for save new country
      * @return http status
      */
+    @Operation(
+        summary = "save a new counry",
+        description = "save a new country and use SaveCountryDto for it",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "created a new country"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+            @ApiResponse(responseCode = "409", description = "country already exists"),
+            @ApiResponse(responseCode = "500", description = "server is badly")
+        }
+    )
     @PutMapping("/save")
-    public ResponseEntity<Country> saveCountry(@RequestBody SaveCountryDto saveCountryDto) {
+    public ResponseEntity<Country> saveCountry(
+        @RequestBody SaveCountryDto saveCountryDto) {
         Country country = new Country();
         country.setId(saveCountryDto.getId());
         country.setName(saveCountryDto.getName());
@@ -47,6 +66,15 @@ public class CountryControllers {
      * for show all country
      * @return http status
      */
+    @Operation(
+        summary = "get all country",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "counter showed to screen"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+            @ApiResponse(responseCode = "404", description = "country not found"),
+            @ApiResponse(responseCode = "500", description = "server is badly")
+        }
+    )
     @GetMapping("/all")
     public ResponseEntity<List<Country>> getAllCountry() {
         return ResponseEntity.ok(countryServices.getAllCountry());
@@ -57,8 +85,24 @@ public class CountryControllers {
      * @param id of country
      * @return http status
      */
+    @Operation(
+        summary = "get country by id",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "showed country to screen"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+            @ApiResponse(responseCode = "404", description = "country not found"),
+            @ApiResponse(responseCode = "500", description = "server is badly")
+        }
+    )
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCountryById(@PathVariable String id) {
+    public ResponseEntity<?> getCountryById(
+        @Parameter(
+            description = """
+                    unique id of country
+                    """,
+            example = "ABH"
+        )
+        @PathVariable String id) {
         return ResponseEntity.ok(countryServices.getCountryById(id));
     }
 
@@ -67,8 +111,29 @@ public class CountryControllers {
      * @param id of country
      * @return http status
      */
+    @Operation(
+        summary = "delete country by id",
+        description = """
+            logical delete country by id,
+            variable is_active table country becomes false
+            and all related castomer becomes false
+        """,
+        responses = {
+            @ApiResponse(responseCode = "204", description = "logical delete is successful"),
+            @ApiResponse(responseCode = "400", description = "incorrect data"),
+            @ApiResponse(responseCode = "404", description = "country not found"),
+            @ApiResponse(responseCode = "500", description = "server is badly")
+        }
+    )
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteCountryById(@PathVariable String id) {
+    public ResponseEntity<?> deleteCountryById(
+        @Parameter(
+            description = """
+                    unique id of country
+                    """,
+            example = "ABH"
+        )
+        @PathVariable String id) {
         countryServices.deleteCountryById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
