@@ -2,14 +2,16 @@ package com.contractor.services;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.contractor.DTO.GetContactorByIdDto;
 import com.contractor.DTO.GetPaginationDto;
-import com.contractor.DTO.SearchContravtorRequestDto;
+import com.contractor.DTO.SaveContractorDto;
+import com.contractor.DTO.SearchContractorRequestDto;
+import com.contractor.mapper.GetContractorByIdMapper;
+import com.contractor.mapper.SaveContractorDtoMapper;
 import com.contractor.model.Contractor;
 import com.contractor.model.Country;
 import com.contractor.model.Industry;
@@ -37,8 +39,11 @@ public class ContractorServices {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final SaveContractorDtoMapper saveContractorDtoMapper;
+
     private final JdbcAggregateTemplate jdbcAggregateTemplate;
 
+    private final GetContractorByIdMapper getContractorByIdMapper;
     /**
      * checkeng all related entity if
      * at least one entity is missing object will not save
@@ -46,23 +51,9 @@ public class ContractorServices {
      * @return save contractor
      */
     @Transactional
-    public Contractor saveContractor(Contractor contractor) {
-        countryRepository.findById(contractor.getCountry())
-            .orElseThrow(() -> new IllegalArgumentException("Country not found"));
-
-        industryRepositiry.findById(contractor.getIndustry())
-            .orElseThrow(() -> new IllegalArgumentException("Industry not foud"));
-
-        orgFormRepository.findById(contractor.getOrgForm())
-            .orElseThrow(() -> new IllegalArgumentException("OrgForm not found"));
-
-        if (contractor.getParentId() != null) {
-            contractorRepository.findById(contractor.getParentId())
-                .orElseThrow(() -> new IllegalArgumentException("Parent contractor not found"));
-        }
-
+    public Contractor saveContractor(SaveContractorDto saveContractorDto) {
+        Contractor contractor = saveContractorDtoMapper.saveNewContractor(saveContractorDto);
         boolean exist = contractorRepository.existsById(contractor.getId());
-
         if (exist) {
             return contractorRepository.save(contractor);
         } else {
@@ -82,39 +73,29 @@ public class ContractorServices {
         Contractor contractor = contractorRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Contructor not found"));
 
-        Country country = countryRepository.findById(contractor.getCountry())
-            .orElseThrow(() -> new IllegalArgumentException("Country not found"));
+        Country country = null;
+        Industry industry = null;
+        OrgForm orgForm = null;
+        if (contractor.getCountry() != null) {
+            country = countryRepository.findById(contractor.getCountry())
+                .orElseThrow(() -> new IllegalArgumentException("Country not found"));
+        }
 
-        Industry industry = industryRepositiry.findById(contractor.getIndustry())
-            .orElseThrow(() -> new IllegalArgumentException("Industry not found"));
+        if (contractor.getIndustry() != null) {
+            industry = industryRepositiry.findById(contractor.getIndustry())
+                .orElseThrow(() -> new IllegalArgumentException("Industry not found"));
+        }
 
-        OrgForm orgForm = orgFormRepository.findById(contractor.getOrgForm())
-            .orElseThrow(() -> new IllegalArgumentException("org form not found"));
+        if (contractor.getOrgForm() != null) {
+            orgForm = orgFormRepository.findById(contractor.getOrgForm())
+                .orElseThrow(() -> new IllegalArgumentException("org form not found"));
+        }
 
         if (!contractor.isActive()) {
             throw new IllegalArgumentException("contractor is not active");
         }
 
-        return new GetContactorByIdDto(
-            contractor.getId(),
-            contractor.getParentId(),
-            contractor.getName(),
-            contractor.getNameFull(),
-            contractor.getInn(),
-            contractor.getOgrn(),
-            new GetContactorByIdDto.GetIndustryDto(
-                industry.getId(),
-                industry.getName()
-            ),
-            new GetContactorByIdDto.GetCountryDto(
-                country.getId(),
-                country.getName()
-            ),
-            new GetContactorByIdDto.GetOrgFormDto(
-                orgForm.getId(),
-                orgForm.getName()
-            )
-        );
+        return getContractorByIdMapper.getContractorByIdMapping(contractor, industry, country, orgForm);
     }
 
     /**
@@ -160,7 +141,6 @@ public class ContractorServices {
         });
     }
 
-
     /**
      * this method create a sql query for searching Object
      * by custom filter, it add custom filter into main sql and
@@ -170,9 +150,8 @@ public class ContractorServices {
      * @param page count page
      * @return list of entity
      */
-    @Transactional
     public List<GetPaginationDto> searchContractors(
-            SearchContravtorRequestDto searchContravtorRequestDto,
+            SearchContractorRequestDto searchContractorRequestDto,
             Integer size,
             Integer page) {
 
@@ -183,53 +162,49 @@ public class ContractorServices {
                                         "WHERE country.is_active = true");
         List<Object> param = new ArrayList<>();
 
-        if (searchContravtorRequestDto.getId() != null) {
+        if (searchContractorRequestDto.getId() != null) {
             sql.append(" AND contractor.id = ?");
-            param.add(searchContravtorRequestDto.getId());
+            param.add(searchContractorRequestDto.getId());
         }
-        if (searchContravtorRequestDto.getParentId() != null) {
+        if (searchContractorRequestDto.getParentId() != null) {
             sql.append(" AND contractor.parent_id = ?");
-            param.add(searchContravtorRequestDto.getParentId());
+            param.add(searchContractorRequestDto.getParentId());
         }
-        if (searchContravtorRequestDto.getName() != null) {
+        if (searchContractorRequestDto.getName() != null) {
             sql.append(" AND LOWER(contractor.name) LIKE ?");
-            String term = "%" + searchContravtorRequestDto.getName().toLowerCase() + "%";
+            String term = "%" + searchContractorRequestDto.getName().toLowerCase() + "%";
             param.add(term);
         }
-        if (searchContravtorRequestDto.getNameFull() != null) {
+        if (searchContractorRequestDto.getNameFull() != null) {
             sql.append(" AND LOWER(contractor.name_full) LIKE ?");
-            String term = "%" + searchContravtorRequestDto.getNameFull().toLowerCase() + "%";
+            String term = "%" + searchContractorRequestDto.getNameFull().toLowerCase() + "%";
             param.add(term);
         }
-        if (searchContravtorRequestDto.getInn() != null) {
-            sql.append(" AND contracotr.inn LIKE ?");
-            String term = "%" + searchContravtorRequestDto.getInn().toLowerCase() + "%";
+        if (searchContractorRequestDto.getInn() != null) {
+            sql.append(" AND contractor.inn LIKE ?");
+            String term = "%" + searchContractorRequestDto.getInn().toLowerCase() + "%";
             param.add(term);
         }
-        if (searchContravtorRequestDto.getOgrn() != null) {
+        if (searchContractorRequestDto.getOgrn() != null) {
             sql.append(" AND contractor.ogrn LIKE ?");
-            String term = "%" + searchContravtorRequestDto.getOgrn().toLowerCase() + "%";
+            String term = "%" + searchContractorRequestDto.getOgrn().toLowerCase() + "%";
             param.add(term);
         }
-        if (searchContravtorRequestDto.getCountry() != null) {
+        if (searchContractorRequestDto.getCountry() != null) {
             sql.append(" AND LOWER(country.name) LIKE ?");
-            param.add("%" + searchContravtorRequestDto.getCountry().toLowerCase() + "%");
+            param.add("%" + searchContractorRequestDto.getCountry().toLowerCase() + "%");
         }
 
-        if (searchContravtorRequestDto.getIndustry() != null) {
+        if (searchContractorRequestDto.getIndustry() != null) {
             sql.append(" AND industry.name = ?");
-            param.add(searchContravtorRequestDto.getIndustry());
+            param.add(searchContractorRequestDto.getIndustry());
         }
 
-        if (searchContravtorRequestDto.getOrgForm() != null) {
+        if (searchContractorRequestDto.getOrgForm() != null) {
             sql.append(" AND LOWER(org_form.name) LIKE ?");
-            param.add("%" + searchContravtorRequestDto.getOrgForm().toLowerCase() + "%");
+            param.add("%" + searchContractorRequestDto.getOrgForm().toLowerCase() + "%");
         }
 
-        sql.append(" ORDER BY contractor.id LIMIT ? OFFSET ?");
-        int offset = page * size;
-        param.add(size);
-        param.add(offset);
         List<GetPaginationDto> list = jdbcTemplate.query(sql.toString(), param.toArray(), (result, row) ->
             new GetPaginationDto(
                 result.getString("id"),

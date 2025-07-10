@@ -1,6 +1,6 @@
-package com.contractor.controller;
+package com.contractor.controller.CountryTest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import org.testcontainers.utility.DockerImageName;
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
-public class OrgFormIntegrationTest {
+public class CountryIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,52 +39,53 @@ public class OrgFormIntegrationTest {
         registrar.add("spring.liquibase.change-log", () -> "classpath:db/changelog/db.changelog-master.yaml");
     }
 
+
     @Test
-    void saveAndGetOrgFormById() throws Exception{
+    void saveAndGetCountryTest() throws Exception {
         String json = """
         {
-            "id": "1",
-            "name": "чтото",
-            "isActive": "true"
+            "id": "RU",
+            "name": "Россия",
+            "active": true
         }
         """;
 
-        mockMvc.perform(put("/orgform/save")
+        mockMvc.perform(put("/country/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
             .andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.id").value("1"));
+            .andExpect(jsonPath("$.id").value("RU"));
 
-        mockMvc.perform(get("/orgform/1"))
+        mockMvc.perform(get("/country/RU"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("чтото"));
+            .andExpect(jsonPath("$.name").value("Россия"));
     }
 
     @Test
-    void getAllOrgFormTest() throws Exception {
-        mockMvc.perform(get("/orgform/all"))
+    void getAllCountryTest() throws Exception {
+        mockMvc.perform(get("/country/all"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.size()").value(150));
+            .andExpect(jsonPath("$.size()").value(254));
     }
 
     @Test
-    void deleteOrgFormTest() throws Exception {
+    void deletCountryTest() throws Exception {
         jdbcTemplate.update("INSERT INTO contractor (id, parent_id, name, " +
             " name_full, inn, ogrn, country, industry, org_form) " +
-            " VALUES ('id1', NULL, 'ilya', 'ilya bobkov', '123', '12345', 'ABH', '51', '51')");
+            " VALUES ('id1', NULL, 'ilya', 'ilya bobkov', '123', '12345', 'ABH', '1', '1')");
 
-        mockMvc.perform(delete("/orgform/delete/51"))
+        mockMvc.perform(delete("/country/delete/ABH"))
             .andExpect(status().is2xxSuccessful());
 
-        Boolean testResult1 = jdbcTemplate.queryForObject(
-            "SELECT is_active FROM org_form WHERE id = '51'",
+        Boolean testResult = jdbcTemplate.queryForObject(
+            "SELECT is_active FROM country WHERE id = 'ABH'",
             Boolean.class);
 
-        Boolean testResult2 = jdbcTemplate.queryForObject(
-        "SELECT is_active FROM contractor WHERE org_form = '51'",
-        Boolean.class);
+        Boolean testResultContractor = jdbcTemplate.queryForObject(
+            "SELECT is_active FROM contractor WHERE country = 'ABH'",
+            Boolean.class);
 
-        assertFalse(testResult1);
-        assertFalse(testResult2);
+        assertFalse(testResult);
+        assertFalse(testResultContractor);
     }
 }

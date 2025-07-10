@@ -1,8 +1,13 @@
 package com.contractor.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+
+import com.contractor.DTO.SaveIndustryDto;
+import com.contractor.mapper.SaveIndustryDtoMapper;
 import com.contractor.model.Industry;
 import com.contractor.repository.IndustryRepositiry;
 import lombok.AllArgsConstructor;
@@ -18,12 +23,22 @@ public class IndustryServices {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final SaveIndustryDtoMapper saveIndustryDtoMapper;
+
     /**
      * find all industry
      * @return list of industry object
      */
-    public List<Industry> getAllIndictry() {
-        return industryRepositiry.findAll();
+    public List<SaveIndustryDto> getAllIndustry() {
+        return industryRepositiry.findAll().stream()
+            .map(industry -> {
+                SaveIndustryDto saveIndustryDto = new SaveIndustryDto();
+                saveIndustryDto.setId(industry.getId());
+                saveIndustryDto.setName(industry.getName());
+                saveIndustryDto.setActive(industry.isActive());
+                return saveIndustryDto;
+            })
+            .collect(Collectors.toList());
     }
 
     /**
@@ -47,7 +62,8 @@ public class IndustryServices {
      * @param industry object
      * @return save industry
      */
-    public Industry saveIndustry(Industry industry) {
+    public Industry saveIndustry(SaveIndustryDto saveIndustryDto) {
+        Industry industry = saveIndustryDtoMapper.saveIndustry(saveIndustryDto);
         return industryRepositiry.save(industry);
     }
 
@@ -57,11 +73,8 @@ public class IndustryServices {
      * @param id of industry
      */
     public void deleteIndustry(Integer id) {
-
         jdbcTemplate.update("UPDATE industry SET is_active = false WHERE id = ?", id);
-
         jdbcTemplate.update("UPDATE contractor SET is_active = false WHERE industry = ?", id);
-
     }
 
 }

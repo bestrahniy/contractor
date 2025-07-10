@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import com.contractor.DTO.SaveCountryDto;
-import com.contractor.model.Country;
 import com.contractor.services.CountryServices;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RestController
 @RequestMapping("/country")
 @AllArgsConstructor
-public class CountryControllers {
+public class CountryController {
 
     private final CountryServices countryServices;
 
@@ -51,14 +50,9 @@ public class CountryControllers {
         }
     )
     @PutMapping("/save")
-    public ResponseEntity<Country> saveCountry(
+    public ResponseEntity<?> saveCountry(
         @RequestBody SaveCountryDto saveCountryDto) {
-        Country country = new Country();
-        country.setId(saveCountryDto.getId());
-        country.setName(saveCountryDto.getName());
-        country.setActive(true);
-        Country saved = countryServices.saveCountry(country);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        return ResponseEntity.ok(countryServices.saveCountry(saveCountryDto));
     }
 
     /**
@@ -76,7 +70,7 @@ public class CountryControllers {
         }
     )
     @GetMapping("/all")
-    public ResponseEntity<List<Country>> getAllCountry() {
+    public ResponseEntity<List<SaveCountryDto>> getAllCountry() {
         return ResponseEntity.ok(countryServices.getAllCountry());
     }
 

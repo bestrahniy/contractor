@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 /**
  * that is controller for org_form table
  * it provides endpoint for orgForm
@@ -49,7 +48,7 @@ public class OrgFormController {
         }
     )
     @GetMapping("/all")
-    public ResponseEntity<List<OrgForm>> getAllOrgForm() {
+    public ResponseEntity<List<SaveOrgFormDto>> getAllOrgForm() {
         return ResponseEntity.ok(orgFormService.giveAllOrgForm());
     }
 
@@ -129,13 +128,8 @@ public class OrgFormController {
         }
     )
     @PutMapping("save")
-    public ResponseEntity<OrgForm> saveOrgForm(@RequestBody SaveOrgFormDto saveOrgFormDto) {
-        OrgForm orgForm = new OrgForm();
-        orgForm.setId(saveOrgFormDto.getId());
-        orgForm.setName(saveOrgFormDto.getName());
-        orgForm.setActive(true);
-        OrgForm saved = orgFormService.saveOrgForm(orgForm);
-        return ResponseEntity.ok(saved);
+    public ResponseEntity<?> saveOrgForm(@RequestBody SaveOrgFormDto saveOrgFormDto) {
+        return ResponseEntity.ok(orgFormService.saveOrgForm(saveOrgFormDto));
     }
 
 }

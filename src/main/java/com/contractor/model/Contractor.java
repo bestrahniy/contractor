@@ -43,7 +43,7 @@ public class Contractor {
     private Integer orgForm;
 
     @Column("create_date")
-    private Instant crateDate = Instant.now();
+    private Instant createDate = Instant.now();
 
     @Column("modify_date")
     private Instant modifyDate;

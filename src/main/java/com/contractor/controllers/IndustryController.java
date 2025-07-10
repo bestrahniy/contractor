@@ -48,8 +48,8 @@ public class IndustryController {
         }
     )
     @GetMapping("/all")
-    public ResponseEntity<List<Industry>> getAllindictry() {
-        return ResponseEntity.ok(industryServices.getAllIndictry());
+    public ResponseEntity<List<SaveIndustryDto>> getAllIndustry() {
+        return ResponseEntity.ok(industryServices.getAllIndustry());
     }
 
     /**
@@ -97,13 +97,8 @@ public class IndustryController {
         }
     )
     @PutMapping("/save")
-    public ResponseEntity<Industry> saveIndustry(@RequestBody SaveIndustryDto saveIndustryDto) {
-        Industry industry = new Industry();
-        industry.setId(saveIndustryDto.getId());
-        industry.setName(saveIndustryDto.getName());
-        industry.setActive(true);
-        Industry saved = industryServices.saveIndustry(industry);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    public ResponseEntity<?> saveIndustry(@RequestBody SaveIndustryDto saveIndustryDto) {
+        return ResponseEntity.ok(industryServices.saveIndustry(saveIndustryDto));
     }
 
     /**

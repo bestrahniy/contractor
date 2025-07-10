@@ -1,8 +1,13 @@
 package com.contractor.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+
+import com.contractor.DTO.SaveOrgFormDto;
+import com.contractor.mapper.SaveOrgFormDtoMapper;
 import com.contractor.model.OrgForm;
 import com.contractor.repository.OrgFormRepository;
 import lombok.AllArgsConstructor;
@@ -18,12 +23,21 @@ public class OrgFormService {
 
     private final JdbcTemplate jdbcType;
 
+    private final SaveOrgFormDtoMapper saveOrgFormDtoMapper;
     /**
      * get all org form
      * @return list of org form object
      */
-    public List<OrgForm> giveAllOrgForm() {
-        return orgFormRepository.findAll();
+    public List<SaveOrgFormDto> giveAllOrgForm() {
+        return orgFormRepository.findAll().stream()
+            .map(orgForm -> {
+                SaveOrgFormDto saveOrgFormDto = new SaveOrgFormDto();
+                saveOrgFormDto.setId(orgForm.getId());
+                saveOrgFormDto.setName(orgForm.getName());
+                saveOrgFormDto.setActive(orgForm.isActive());
+                return saveOrgFormDto;
+                })
+            .collect(Collectors.toList());
     }
 
     /**
@@ -57,7 +71,8 @@ public class OrgFormService {
      * @param orgForm object
      * @return save org form
      */
-    public OrgForm saveOrgForm(OrgForm orgForm) {
+    public OrgForm saveOrgForm(SaveOrgFormDto saveOrgFormDto) {
+        OrgForm orgForm = saveOrgFormDtoMapper.saveOrgForm(saveOrgFormDto);
         return orgFormRepository.save(orgForm);
     }
 

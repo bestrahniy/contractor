@@ -1,4 +1,4 @@
-package com.contractor.controller;
+package com.contractor.controller.IndustryTest;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -46,7 +46,7 @@ public class IndustryIntegrationTest {
         {
             "id": "51",
             "name": "rowing",
-            "isActive": "true"
+            "active": true
         }
         """;
 

@@ -1,4 +1,4 @@
-package com.contractor.services;
+package com.contractor.services.IndustryTest;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -13,6 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import com.contractor.DTO.SaveIndustryDto;
+import com.contractor.mapper.SaveIndustryDtoMapper;
 import com.contractor.model.Industry;
 import com.contractor.repository.IndustryRepositiry;
 import com.contractor.services.IndustryServices;
@@ -28,8 +31,13 @@ public class IndustryServiceMockTest {
     IndustryServices industryServices;
 
     @Mock
+    SaveIndustryDtoMapper saveIndustryDtoMapper;
+
+    @Mock
     JdbcTemplate jdbcTemplate;
 
+    SaveIndustryDto saveIndustryDto;
+    
     Industry testIndustry;
 
     @Before
@@ -38,6 +46,11 @@ public class IndustryServiceMockTest {
         testIndustry.setId(51);
         testIndustry.setName("Инжененрия");
         testIndustry.setActive(true);
+
+        saveIndustryDto = new SaveIndustryDto();
+        saveIndustryDto.setId(51);
+        saveIndustryDto.setName("Ниженерия");
+        saveIndustryDto.setActive(true);
     }
 
     @Test
@@ -81,8 +94,13 @@ public class IndustryServiceMockTest {
 
     @Test
     public void saveIndustryTest(){
-        when(industryRepositiry.save(testIndustry)).thenReturn(testIndustry);
-        Industry industry = industryServices.saveIndustry(testIndustry);
+        when(industryRepositiry.save(testIndustry))
+            .thenReturn(testIndustry);
+
+        when(saveIndustryDtoMapper.saveIndustry(saveIndustryDto))
+            .thenReturn(testIndustry);
+
+        Industry industry = industryServices.saveIndustry(saveIndustryDto);
         assertEquals(testIndustry, industry);
     }
 }

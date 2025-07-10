@@ -22,4 +22,8 @@ public class SaveCountryDto {
         example = "Абхазия")
     private String name;
 
+    @Schema(description = "status country",
+        example = "true")
+    private boolean isActive;
+
 }

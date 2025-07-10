@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SearchContravtorRequestDto {
+public class SearchContractorRequestDto {
 
     @Schema(description = "search all contractor by this id",
         example = "id1")

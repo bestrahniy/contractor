@@ -1,10 +1,7 @@
-package com.contractor.services;
+package com.contractor.services.ContractorTest;
 
 
 import static org.junit.Assert.*;
-import java.time.Instant;
-
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +15,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import com.contractor.DTO.GetContactorByIdDto;
-import com.contractor.DTO.SearchContravtorRequestDto;
-import com.contractor.model.Contractor;
+import com.contractor.DTO.SaveContractorDto;
+import com.contractor.DTO.SearchContractorRequestDto;
+import com.contractor.services.ContractorServices;
 
 
 @SpringBootTest
@@ -50,11 +48,16 @@ public class ContractorIntegracionTest {
 
     @Test
     void saveAndGetContractorByIdTest(){
-        Contractor testContractor = new Contractor(
-            "testId", null, "ilya", "ilya bobkov",
-            "12345", "1234", "ABH", 1, 1,
-            Instant.now(),Instant.now(),"testId","testId",true
-        );
+        SaveContractorDto testContractor = new SaveContractorDto();
+        testContractor.setId("testId");
+        testContractor.setParentId(null);
+        testContractor.setName("ilya");
+        testContractor.setNameFull("ilya bobkov");
+        testContractor.setInn("12345");
+        testContractor.setOgrn("123");
+        testContractor.setCountry("ABH");
+        testContractor.setIndustry(1);
+        testContractor.setOrgForm(1);
 
         contractorServices.saveContractor(testContractor);
 
@@ -65,11 +68,16 @@ public class ContractorIntegracionTest {
 
     @Test
     void deleteContractorById(){
-        Contractor testContractor = new Contractor(
-            "testId", null, "ilya", "ilya bobkov",
-            "12345", "1234", "ABH", 1, 1,
-            Instant.now(),Instant.now(),"testId","testId",true
-        );
+        SaveContractorDto testContractor = new SaveContractorDto();
+        testContractor.setId("testId");
+        testContractor.setParentId(null);
+        testContractor.setName("ilya");
+        testContractor.setNameFull("ilya bobkov");
+        testContractor.setInn("12345");
+        testContractor.setOgrn("123");
+        testContractor.setCountry("ABH");
+        testContractor.setIndustry(1);
+        testContractor.setOrgForm(1);
 
         contractorServices.saveContractor(testContractor);
 
@@ -103,7 +111,7 @@ public class ContractorIntegracionTest {
     }
 
     @Test
-    void testPaginationFilter(){
+    void testFilter(){
         jdbcTemplate.update("""
             INSERT INTO contractor
             (id, parent_id, name, name_full, inn, ogrn,country,
@@ -120,8 +128,8 @@ public class ContractorIntegracionTest {
             """
         );
 
-        var filter = new SearchContravtorRequestDto();
-        var filter2 = new SearchContravtorRequestDto();
+        var filter = new SearchContractorRequestDto();
+        var filter2 = new SearchContractorRequestDto();
         filter.setNameFull("bob");
         filter2.setNameFull("bobkov");;
 

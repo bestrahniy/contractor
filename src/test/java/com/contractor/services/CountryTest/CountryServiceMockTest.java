@@ -1,4 +1,4 @@
-package com.contractor.services;
+package com.contractor.services.CountryTest;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -11,9 +11,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import com.contractor.DTO.SaveCountryDto;
+import com.contractor.mapper.SaveCountryDtoMapper;
 import com.contractor.model.Country;
 import com.contractor.repository.CountryRepository;
+import com.contractor.services.CountryServices;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,10 +33,22 @@ public class CountryServiceMockTest {
     @Mock
     CountryRepository countryRepository;
 
+    @Mock
+    JdbcAggregateTemplate jdbcAggregateTemplate;
+
+    @Mock
+    SaveCountryDtoMapper saveCountryDtoMapper;
+
+    SaveCountryDto testCountryDto;
+
     Country testCountry;
     
     @Before
     public void init(){
+        testCountryDto = new SaveCountryDto();
+        testCountryDto.setId("RU");
+        testCountryDto.setName("Россия");
+
         testCountry = new Country();
         testCountry.setId("RU");
         testCountry.setName("Россия");
@@ -43,13 +60,11 @@ public class CountryServiceMockTest {
         when(countryRepository.save(testCountry))
             .thenReturn(testCountry);
 
-        when(countryRepository.existsById(testCountry.getId()))
-            .thenReturn(true);
+        when(saveCountryDtoMapper.saveNewCountry(testCountryDto))
+            .thenReturn(testCountry);
 
-        Country result = countryServices.saveCountry(testCountry);
-
+        Country result = countryServices.saveCountry(testCountryDto);
         assertEquals(testCountry, result);
-
         verify(countryRepository).save(testCountry);
     }
 
@@ -66,7 +81,7 @@ public class CountryServiceMockTest {
 
         when(countryRepository.findAll()).thenReturn(countrys);
 
-        List<Country> result = countryServices.getAllCountry();
+        List<SaveCountryDto> result = countryServices.getAllCountry();
 
         Country getIdresult = countryServices.getCountryById("BLR");
 

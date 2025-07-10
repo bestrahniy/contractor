@@ -1,7 +1,6 @@
 package com.contractor.controllers;
 
 import java.util.List;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,10 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.contractor.DTO.GetContactorByIdDto;
 import com.contractor.DTO.GetPaginationDto;
 import com.contractor.DTO.SaveContractorDto;
-import com.contractor.DTO.SearchContravtorRequestDto;
-import com.contractor.model.Contractor;
+import com.contractor.DTO.SearchContractorRequestDto;
 import com.contractor.services.ContractorServices;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -33,7 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RestController()
 @RequestMapping("/contractor")
 @AllArgsConstructor
-public class ContractorContollers {
+public class ContractorContoller {
 
     private final ContractorServices contractorServices;
 
@@ -53,24 +50,9 @@ public class ContractorContollers {
         }
     )
     @PutMapping("/save")
-    public ResponseEntity<String> saveContructor(
+    public ResponseEntity<?> saveContructor(
         @RequestBody SaveContractorDto saveContractorDto) {
-        Contractor contractor = new Contractor();
-        contractor.setId(saveContractorDto.getId());
-        contractor.setParentId(saveContractorDto.getParentId());
-        contractor.setNameFull(saveContractorDto.getNameFull());
-        contractor.setInn(saveContractorDto.getInn());
-        contractor.setOgrn(saveContractorDto.getOgrn());
-        contractor.setCountry(saveContractorDto.getCountry());
-        contractor.setIndustry(saveContractorDto.getIndustry());
-        contractor.setOrgForm(saveContractorDto.getOrgForm());
-        contractor.setName(saveContractorDto.getName());
-
-        contractorServices.saveContractor(contractor);
-
-        return  ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(contractor.getId());
+        return  ResponseEntity.ok(contractorServices.saveContractor(saveContractorDto));
     }
 
     /**
@@ -183,7 +165,7 @@ public class ContractorContollers {
     )
     @PostMapping("/search")
     public ResponseEntity<List<GetPaginationDto>> postMethodName(
-        @RequestBody SearchContravtorRequestDto searchContravtorRequestDto) {
+        @RequestBody SearchContractorRequestDto searchContravtorRequestDto) {
         return ResponseEntity.ok(contractorServices.searchContractors(searchContravtorRequestDto, 10, 0));
     }
 
