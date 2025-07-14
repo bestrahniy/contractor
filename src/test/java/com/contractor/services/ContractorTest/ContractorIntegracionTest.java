@@ -14,9 +14,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import com.contractor.DTO.GetContactorByIdDto;
-import com.contractor.DTO.SaveContractorDto;
-import com.contractor.DTO.SearchContractorRequestDto;
+import com.contractor.dto.GetContactorByIdDto;
+import com.contractor.dto.SaveContractorDto;
+import com.contractor.dto.SearchContractorRequestDto;
 import com.contractor.services.ContractorServices;
 
 

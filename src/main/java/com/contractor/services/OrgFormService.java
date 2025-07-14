@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.contractor.DTO.SaveOrgFormDto;
-import com.contractor.mapper.SaveOrgFormDtoMapper;
+import com.contractor.dto.SaveOrgFormDto;
+import com.contractor.mapper.OrgFormSaveDtoMapper;
 import com.contractor.model.OrgForm;
 import com.contractor.repository.OrgFormRepository;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ public class OrgFormService {
 
     private final JdbcTemplate jdbcType;
 
-    private final SaveOrgFormDtoMapper saveOrgFormDtoMapper;
+    private final OrgFormSaveDtoMapper saveOrgFormDtoMapper;
     /**
      * get all org form
      * @return list of org form object

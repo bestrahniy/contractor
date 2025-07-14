@@ -14,8 +14,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.contractor.DTO.SaveCountryDto;
-import com.contractor.mapper.SaveCountryDtoMapper;
+import com.contractor.dto.SaveCountryDto;
+import com.contractor.mapper.CountrySaveDtoMapper;
 import com.contractor.model.Country;
 import com.contractor.repository.CountryRepository;
 import com.contractor.services.CountryServices;
@@ -37,7 +37,7 @@ public class CountryServiceMockTest {
     JdbcAggregateTemplate jdbcAggregateTemplate;
 
     @Mock
-    SaveCountryDtoMapper saveCountryDtoMapper;
+    CountrySaveDtoMapper saveCountryDtoMapper;
 
     SaveCountryDto testCountryDto;
 
@@ -57,15 +57,15 @@ public class CountryServiceMockTest {
 
     @Test
     public void saveCountryTest(){
-        when(countryRepository.save(testCountry))
-            .thenReturn(testCountry);
-
         when(saveCountryDtoMapper.saveNewCountry(testCountryDto))
             .thenReturn(testCountry);
 
+        when(jdbcAggregateTemplate.insert(testCountry))
+            .thenReturn(testCountry);
+            
         Country result = countryServices.saveCountry(testCountryDto);
         assertEquals(testCountry, result);
-        verify(countryRepository).save(testCountry);
+        verify(jdbcAggregateTemplate).insert(testCountry);
     }
 
     @Test

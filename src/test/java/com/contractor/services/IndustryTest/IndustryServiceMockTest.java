@@ -14,8 +14,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.contractor.DTO.SaveIndustryDto;
-import com.contractor.mapper.SaveIndustryDtoMapper;
+import com.contractor.dto.SaveIndustryDto;
+import com.contractor.mapper.IndustrySaveDtoMapper;
+
 import com.contractor.model.Industry;
 import com.contractor.repository.IndustryRepositiry;
 import com.contractor.services.IndustryServices;
@@ -31,7 +32,7 @@ public class IndustryServiceMockTest {
     IndustryServices industryServices;
 
     @Mock
-    SaveIndustryDtoMapper saveIndustryDtoMapper;
+    IndustrySaveDtoMapper saveIndustryDtoMapper;
 
     @Mock
     JdbcTemplate jdbcTemplate;

@@ -2,7 +2,8 @@ package com.contractor.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.contractor.DTO.SaveIndustryDto;
+
+import com.contractor.dto.SaveIndustryDto;
 import com.contractor.model.Industry;
 import com.contractor.services.IndustryServices;
 import io.swagger.v3.oas.annotations.Operation;

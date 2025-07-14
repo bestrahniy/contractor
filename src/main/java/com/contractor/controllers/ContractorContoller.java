@@ -6,10 +6,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.contractor.DTO.GetContactorByIdDto;
-import com.contractor.DTO.GetPaginationDto;
-import com.contractor.DTO.SaveContractorDto;
-import com.contractor.DTO.SearchContractorRequestDto;
+
+import com.contractor.dto.GetContactorByIdDto;
+import com.contractor.dto.GetPaginationDto;
+import com.contractor.dto.SaveContractorDto;
+import com.contractor.dto.SearchContractorRequestDto;
 import com.contractor.services.ContractorServices;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

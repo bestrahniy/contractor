@@ -15,11 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
-import com.contractor.DTO.GetContactorByIdDto;
-import com.contractor.DTO.GetPaginationDto;
-import com.contractor.DTO.SaveContractorDto;
-import com.contractor.mapper.SaveContractorDtoMapper;
-import com.contractor.mapper.SaveOrgFormDtoMapper;
+
+import com.contractor.dto.GetContactorByIdDto;
+import com.contractor.dto.GetPaginationDto;
+import com.contractor.dto.SaveContractorDto;
+import com.contractor.mapper.ContractorSaveDtoMapper;
+import com.contractor.mapper.GetContractorByIdMapper;
 import com.contractor.model.Contractor;
 import com.contractor.model.Country;
 import com.contractor.model.Industry;
@@ -47,7 +48,10 @@ public class ContractorServiceMockTest {
     OrgFormRepository orgFormRepository;
 
     @Mock
-    SaveContractorDtoMapper saveContractorDtoMapper;
+    ContractorSaveDtoMapper saveContractorDtoMapper;
+
+    @Mock
+    GetContractorByIdMapper getContractorByIdMapper;
 
     @Mock
     JdbcTemplate jdbcTemplate;
@@ -119,6 +123,27 @@ public class ContractorServiceMockTest {
         when(orgFormRepository.findById(1))
             .thenReturn(Optional.of(orgForm));
 
+        when(getContractorByIdMapper.getContractorByIdMapping(contractor, industry, country, orgForm))
+            .thenReturn(new GetContactorByIdDto(
+                contractor.getId(),
+                contractor.getParentId(),
+                contractor.getName(),
+                contractor.getNameFull(),
+                contractor.getInn(),
+                contractor.getOgrn(),
+                new GetContactorByIdDto.GetIndustryDto(
+                    industry.getId(),
+                    industry.getName()
+                ),
+                new GetContactorByIdDto.GetCountryDto(
+                    country.getId(),
+                    country.getName()
+                ),
+                new GetContactorByIdDto.GetOrgFormDto(
+                    orgForm.getId(),
+                    orgForm.getName()
+                )
+            ));
         GetContactorByIdDto result = services.getContractorById("testId");
 
         assertEquals("ilya", result.getName());

@@ -1,17 +1,19 @@
 package com.contractor.services;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.contractor.DTO.GetContactorByIdDto;
-import com.contractor.DTO.GetPaginationDto;
-import com.contractor.DTO.SaveContractorDto;
-import com.contractor.DTO.SearchContractorRequestDto;
+
+import com.contractor.dto.GetContactorByIdDto;
+import com.contractor.dto.GetPaginationDto;
+import com.contractor.dto.SaveContractorDto;
+import com.contractor.dto.SearchContractorRequestDto;
+import com.contractor.mapper.ContractorSaveDtoMapper;
 import com.contractor.mapper.GetContractorByIdMapper;
-import com.contractor.mapper.SaveContractorDtoMapper;
 import com.contractor.model.Contractor;
 import com.contractor.model.Country;
 import com.contractor.model.Industry;
@@ -39,7 +41,7 @@ public class ContractorServices {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final SaveContractorDtoMapper saveContractorDtoMapper;
+    private final ContractorSaveDtoMapper saveContractorDtoMapper;
 
     private final JdbcAggregateTemplate jdbcAggregateTemplate;
 
@@ -53,6 +55,8 @@ public class ContractorServices {
     @Transactional
     public Contractor saveContractor(SaveContractorDto saveContractorDto) {
         Contractor contractor = saveContractorDtoMapper.saveNewContractor(saveContractorDto);
+        contractor.setCreateDate(Instant.now());
+        contractor.setActive(true);
         boolean exist = contractorRepository.existsById(contractor.getId());
         if (exist) {
             return contractorRepository.save(contractor);

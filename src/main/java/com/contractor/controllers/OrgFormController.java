@@ -2,7 +2,8 @@ package com.contractor.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.contractor.DTO.SaveOrgFormDto;
+
+import com.contractor.dto.SaveOrgFormDto;
 import com.contractor.model.OrgForm;
 import com.contractor.services.OrgFormService;
 import io.swagger.v3.oas.annotations.Operation;

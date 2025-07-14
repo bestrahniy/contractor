@@ -2,14 +2,13 @@ package com.contractor.services;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.contractor.DTO.SaveCountryDto;
-import com.contractor.mapper.SaveCountryDtoMapper;
+
+import com.contractor.dto.SaveCountryDto;
+import com.contractor.mapper.CountrySaveDtoMapper;
 import com.contractor.model.Country;
 import com.contractor.repository.CountryRepository;
 import lombok.AllArgsConstructor;
@@ -23,7 +22,7 @@ public class CountryServices {
 
     private final CountryRepository countryRepository;
 
-    private final SaveCountryDtoMapper saveCountryDtoMapper;
+    private final CountrySaveDtoMapper saveCountryDtoMapper;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -37,9 +36,10 @@ public class CountryServices {
     @Transactional
     public Country saveCountry(SaveCountryDto saveCountryDto) {
         Country country = saveCountryDtoMapper.saveNewCountry(saveCountryDto);
-        try {
+        boolean exist = countryRepository.existsById(country.getId());
+        if (exist) {
             return countryRepository.save(country);
-        } catch (IncorrectUpdateSemanticsDataAccessException ex) {
+        } else {
             return jdbcAggregateTemplate.insert(country);
         }
     }

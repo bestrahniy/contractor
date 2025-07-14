@@ -1,7 +1,8 @@
 package com.contractor.mapper;
 
 import org.springframework.stereotype.Component;
-import com.contractor.DTO.GetContactorByIdDto;
+
+import com.contractor.dto.GetContactorByIdDto;
 import com.contractor.model.Contractor;
 import com.contractor.model.Country;
 import com.contractor.model.Industry;

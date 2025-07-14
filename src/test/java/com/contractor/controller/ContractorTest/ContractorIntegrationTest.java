@@ -62,7 +62,9 @@ public class ContractorIntegrationTest {
         }
         """;
 
-        mockMvc.perform(put("/contractor/save").contentType(MediaType.APPLICATION_JSON).content(json))
+        mockMvc.perform(put("/contractor/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
             .andExpect(status().is2xxSuccessful());
 
         mockMvc.perform(get("/contractor/id1"))

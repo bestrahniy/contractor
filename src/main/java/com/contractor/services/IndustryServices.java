@@ -2,12 +2,11 @@ package com.contractor.services;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.contractor.DTO.SaveIndustryDto;
-import com.contractor.mapper.SaveIndustryDtoMapper;
+import com.contractor.dto.SaveIndustryDto;
+import com.contractor.mapper.IndustrySaveDtoMapper;
 import com.contractor.model.Industry;
 import com.contractor.repository.IndustryRepositiry;
 import lombok.AllArgsConstructor;
@@ -23,7 +22,7 @@ public class IndustryServices {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final SaveIndustryDtoMapper saveIndustryDtoMapper;
+    private final IndustrySaveDtoMapper saveIndustryDtoMapper;
 
     /**
      * find all industry
