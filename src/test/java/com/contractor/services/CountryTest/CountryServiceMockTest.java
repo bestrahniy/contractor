@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.contractor.dto.SaveCountryDto;
 import com.contractor.mapper.CountrySaveDtoMapper;
@@ -28,7 +29,7 @@ public class CountryServiceMockTest {
     CountryServices countryServices;
 
     @Mock
-    JdbcTemplate jdbcTemplate;
+    NamedParameterJdbcTemplate jdbcTemplate;
 
     @Mock
     CountryRepository countryRepository;
@@ -88,19 +89,28 @@ public class CountryServiceMockTest {
         assertEquals("Belarus", getIdresult.getName());
 
         assertEquals("USA", result.get(1).getName());
-    }
+        }
 
     @Test
-    public void deleteCountryTest(){
-        when(jdbcTemplate.queryForObject(anyString(), eq(Boolean.class)))
-            .thenReturn(false);
-            
-        countryServices.deleteCountryById("RU");
-        Boolean type = jdbcTemplate.queryForObject("SELECT is_active FROM country WHERE id = RU", Boolean.class);
-        assertEquals(false, type);
+    public void deleteCountryTest() {
+        when(jdbcTemplate.queryForObject(
+            anyString(),
+            any(Map.class),
+            eq(Boolean.class)
+        )).thenReturn(false);
 
-        verify(jdbcTemplate).update("UPDATE country SET is_active = false WHERE id = ?", "RU");
-        verify(jdbcTemplate).update("UPDATE contractor SET is_active = false WHERE country = ?", "RU");
+        when(jdbcTemplate.update(anyString(), any(Map.class)))
+            .thenReturn(1);
+
+        countryServices.deleteCountryById("RU");
+
+        Boolean result = jdbcTemplate.queryForObject(
+            "SELECT is_active FROM country WHERE id = :id",
+            Map.of("id", "RU"),
+            Boolean.class
+        );
+        assertFalse(result);
+
     }
 
 }

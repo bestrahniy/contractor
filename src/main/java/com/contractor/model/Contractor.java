@@ -1,7 +1,12 @@
 package com.contractor.model;
 
 import java.time.Instant;
+
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import lombok.AllArgsConstructor;
@@ -44,15 +49,19 @@ public class Contractor {
     @Column("org_form")
     private Integer orgForm;
 
+    @CreatedDate
     @Column("create_date")
-    private Instant createDate = Instant.now();
+    private Instant createDate;
 
+    @LastModifiedDate
     @Column("modify_date")
     private Instant modifyDate;
 
+    @CreatedBy
     @Column("create_user_id")
     private String createUserId;
 
+    @LastModifiedBy
     @Column("modify_user_id")
     private String modifyUserId;
 

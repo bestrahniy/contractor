@@ -6,8 +6,10 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +56,7 @@ public class ContractorServiceMockTest {
     GetContractorByIdMapper getContractorByIdMapper;
 
     @Mock
-    JdbcTemplate jdbcTemplate;
+    NamedParameterJdbcTemplate jdbcTemplate;
 
     @InjectMocks
     ContractorServices services;
@@ -168,23 +170,28 @@ public class ContractorServiceMockTest {
     }
 
     @Test
-    public void getAllContractorPaginationTest(){
+    public void getAllContractorPaginationTest() {
         int page = 1;
         int size = 5;
-        List<GetPaginationDto> getPagination = List.of(
+        int offset = page * size;
+        
+        List<GetPaginationDto> expectedResult = List.of(
             new GetPaginationDto("id", "null", "ilya", "ILya Bobkov", 
             "inn", "ogrn", "ABH", 1, 1)
         );
 
         when(jdbcTemplate.query(
             anyString(),
-            eq(new Object[]{size, page*size}),
+            argThat((Map<String, Object> params) ->
+                params.get("limit").equals(size) &&
+                params.get("offset").equals(offset)),
             any(RowMapper.class)
-        )).thenReturn(getPagination);
+        )).thenReturn(expectedResult);
 
         List<GetPaginationDto> result = services.getAllContractorPagination(page, size);
 
         assertEquals(1, result.size());
+        assertEquals(expectedResult.get(0).getId(), result.get(0).getId());
     }
 
 }

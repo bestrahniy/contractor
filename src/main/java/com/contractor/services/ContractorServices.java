@@ -1,13 +1,13 @@
 package com.contractor.services;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.contractor.dto.GetContactorByIdDto;
 import com.contractor.dto.GetPaginationDto;
 import com.contractor.dto.SaveContractorDto;
@@ -39,7 +39,7 @@ public class ContractorServices {
 
     private final OrgFormRepository orgFormRepository;
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private final ContractorSaveDtoMapper saveContractorDtoMapper;
 
@@ -125,12 +125,17 @@ public class ContractorServices {
     @Transactional
     public List<GetPaginationDto> getAllContractorPagination(int page, int size) {
 
-        int lasElem = page * size;
+        int offset = page * size;
 
         String sql = "SELECT id, parent_id, name, name_full, inn, ogrn, country, industry, org_form "
-            + " FROM contractor id LIMIT ? OFFSET ?";
+            + " FROM contractor id LIMIT :limit OFFSET :offset";
 
-        return jdbcTemplate.query(sql, new Object[]{size, lasElem}, (result, strNumber) -> {
+        Map<String, Object> params = Map.of(
+        "limit", size,
+        "offset", offset
+        );
+
+        return jdbcTemplate.query(sql, params, (result, strNumber) -> {
             GetPaginationDto contractor = new GetPaginationDto();
             contractor.setId(result.getString("id"));
             contractor.setParentId(result.getString("parent_id"));
@@ -164,52 +169,52 @@ public class ContractorServices {
                                         "FULL JOIN industry ON contractor.industry = industry.id " +
                                         "FULL JOIN org_form ON contractor.org_form = org_form.id " +
                                         "WHERE country.is_active = true");
-        List<Object> param = new ArrayList<>();
+        Map<String, Object> param = new HashMap<>();
 
         if (searchContractorRequestDto.getId() != null) {
-            sql.append(" AND contractor.id = ?");
-            param.add(searchContractorRequestDto.getId());
+            sql.append(" AND contractor.id = :id");
+            param.put("id", searchContractorRequestDto.getId());
         }
         if (searchContractorRequestDto.getParentId() != null) {
-            sql.append(" AND contractor.parent_id = ?");
-            param.add(searchContractorRequestDto.getParentId());
+            sql.append(" AND contractor.parent_id = :parentId");
+            param.put("parentId", searchContractorRequestDto.getParentId());
         }
         if (searchContractorRequestDto.getName() != null) {
-            sql.append(" AND LOWER(contractor.name) LIKE ?");
+            sql.append(" AND LOWER(contractor.name) LIKE :name");
             String term = "%" + searchContractorRequestDto.getName().toLowerCase() + "%";
-            param.add(term);
+            param.put("name", term);
         }
         if (searchContractorRequestDto.getNameFull() != null) {
-            sql.append(" AND LOWER(contractor.name_full) LIKE ?");
+            sql.append(" AND LOWER(contractor.name_full) LIKE :nameFull");
             String term = "%" + searchContractorRequestDto.getNameFull().toLowerCase() + "%";
-            param.add(term);
+            param.put("name_full", term);
         }
         if (searchContractorRequestDto.getInn() != null) {
-            sql.append(" AND contractor.inn LIKE ?");
+            sql.append(" AND contractor.inn LIKE :inn");
             String term = "%" + searchContractorRequestDto.getInn().toLowerCase() + "%";
-            param.add(term);
+            param.put("inn", term);
         }
         if (searchContractorRequestDto.getOgrn() != null) {
-            sql.append(" AND contractor.ogrn LIKE ?");
+            sql.append(" AND contractor.ogrn LIKE :ogrn");
             String term = "%" + searchContractorRequestDto.getOgrn().toLowerCase() + "%";
-            param.add(term);
+            param.put("ogrn", term);
         }
         if (searchContractorRequestDto.getCountry() != null) {
-            sql.append(" AND LOWER(country.name) LIKE ?");
-            param.add("%" + searchContractorRequestDto.getCountry().toLowerCase() + "%");
+            sql.append(" AND LOWER(country.name) LIKE :country");
+            param.put("country", "%" + searchContractorRequestDto.getCountry().toLowerCase() + "%");
         }
 
         if (searchContractorRequestDto.getIndustry() != null) {
-            sql.append(" AND industry.name = ?");
-            param.add(searchContractorRequestDto.getIndustry());
+            sql.append(" AND industry.name = :industry");
+            param.put("industry", searchContractorRequestDto.getIndustry());
         }
 
         if (searchContractorRequestDto.getOrgForm() != null) {
-            sql.append(" AND LOWER(org_form.name) LIKE ?");
-            param.add("%" + searchContractorRequestDto.getOrgForm().toLowerCase() + "%");
+            sql.append(" AND LOWER(org_form.name) LIKE :orgForm");
+            param.put("orgForm", "%" + searchContractorRequestDto.getOrgForm().toLowerCase() + "%");
         }
 
-        List<GetPaginationDto> list = jdbcTemplate.query(sql.toString(), param.toArray(), (result, row) ->
+        List<GetPaginationDto> list = jdbcTemplate.query(sql.toString(), param, (result, row) ->
             new GetPaginationDto(
                 result.getString("id"),
                 result.getString("parent_id"),

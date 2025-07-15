@@ -1,9 +1,9 @@
 package com.contractor.services;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.contractor.dto.SaveOrgFormDto;
@@ -21,7 +21,7 @@ public class OrgFormService {
 
     private final OrgFormRepository orgFormRepository;
 
-    private final JdbcTemplate jdbcType;
+    private final NamedParameterJdbcTemplate jdbcType;
 
     private final OrgFormSaveDtoMapper saveOrgFormDtoMapper;
     /**
@@ -62,8 +62,11 @@ public class OrgFormService {
      * @param id of orf form
      */
     public void deleteOrgForm(Integer id) {
-        jdbcType.update("UPDATE org_form SET is_active = false WHERE id = ?", id);
-        jdbcType.update("UPDATE  contractor SET is_active = false WHERE org_form = ?", id);
+        String sql1 = "UPDATE org_form SET is_active = false WHERE id = :id";
+        String sql2 = "UPDATE  contractor SET is_active = false WHERE org_form = :id";
+        Map<String, Object> param = Map.of("id", id);
+        jdbcType.update(sql1, param);
+        jdbcType.update(sql2, param);
     }
 
     /**

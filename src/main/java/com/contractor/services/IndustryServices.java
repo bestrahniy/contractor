@@ -1,8 +1,9 @@
 package com.contractor.services;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.contractor.dto.SaveIndustryDto;
@@ -20,7 +21,7 @@ public class IndustryServices {
 
     private final IndustryRepositiry industryRepositiry;
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private final IndustrySaveDtoMapper saveIndustryDtoMapper;
 
@@ -72,8 +73,11 @@ public class IndustryServices {
      * @param id of industry
      */
     public void deleteIndustry(Integer id) {
-        jdbcTemplate.update("UPDATE industry SET is_active = false WHERE id = ?", id);
-        jdbcTemplate.update("UPDATE contractor SET is_active = false WHERE industry = ?", id);
+        String sql1 = "UPDATE industry SET is_active = false WHERE id = :id";
+        String sql2 = "UPDATE contractor SET is_active = false WHERE industry = :id";
+        Map<String, Object> param = Map.of("id", id);
+        jdbcTemplate.update(sql1, param);
+        jdbcTemplate.update(sql2, param);
     }
 
 }

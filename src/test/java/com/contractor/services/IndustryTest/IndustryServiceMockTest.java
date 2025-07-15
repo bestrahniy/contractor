@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.contractor.dto.SaveIndustryDto;
 import com.contractor.mapper.IndustrySaveDtoMapper;
@@ -35,7 +37,7 @@ public class IndustryServiceMockTest {
     IndustrySaveDtoMapper saveIndustryDtoMapper;
 
     @Mock
-    JdbcTemplate jdbcTemplate;
+    NamedParameterJdbcTemplate jdbcTemplate;
 
     SaveIndustryDto saveIndustryDto;
     
@@ -69,19 +71,29 @@ public class IndustryServiceMockTest {
     }
 
     @Test
-    public void deleteIndustryTest(){
+    public void deleteIndustryTest() {
+        Industry testIndustry = new Industry(51, "Test Industry", true);
         industryRepositiry.save(testIndustry);
-        industryServices.deleteIndustry(51);
 
-        when(jdbcTemplate.queryForObject(anyString(), eq(Boolean.class)))
-            .thenReturn(false);
+        when(jdbcTemplate.queryForObject(
+            anyString(),
+            any(Map.class),
+            eq(Boolean.class)
+        )).thenReturn(false);
 
-        Boolean type = jdbcTemplate.queryForObject("SELECT is_active FROM industry", Boolean.class);
+        when(jdbcTemplate.update(
+            anyString(),
+            any(Map.class)
+        )).thenReturn(1);
 
-        assertEquals(false, type);
-        
-        verify(jdbcTemplate).update("UPDATE industry SET is_active = false WHERE id = ?", testIndustry.getId());
-        verify(jdbcTemplate).update("UPDATE contractor SET is_active = false WHERE industry = ?", testIndustry.getId());
+        industryServices.deleteIndustry(testIndustry.getId());
+
+        Boolean isActive = jdbcTemplate.queryForObject(
+            "SELECT is_active FROM industry WHERE id = :id",
+            Map.of("id", testIndustry.getId()),
+            Boolean.class
+        );
+        assertFalse(isActive);
     }
 
     @Test

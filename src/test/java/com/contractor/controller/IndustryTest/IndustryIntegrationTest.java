@@ -3,12 +3,16 @@ package com.contractor.controller.IndustryTest;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,7 +31,7 @@ public class IndustryIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Container
     private final static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:17"));
@@ -41,7 +45,10 @@ public class IndustryIntegrationTest {
     }
 
     @Test
-    void createAndGetIndustryByIdTest() throws Exception{
+    void createAndGetIndustryByIdTest() throws Exception {
+        String insertIndustrySql = "INSERT INTO industry (id, name, is_active) VALUES (:id, :name, :active)";
+        String selectIndustrySql = "SELECT * FROM industry WHERE id = :id";
+        
         String json = """
         {
             "id": "51",
@@ -53,41 +60,64 @@ public class IndustryIntegrationTest {
         mockMvc.perform(put("/industry/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value("51"))
             .andExpect(jsonPath("$.name").value("rowing"));
 
         mockMvc.perform(get("/industry/51"))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value("51"))
             .andExpect(jsonPath("$.name").value("rowing"));
     }
 
     @Test
-    void getAllIndustryTest() throws Exception{
+    void getAllIndustryTest() throws Exception {
+        String countIndustriesSql = "SELECT COUNT(*) FROM industry";
+        int initialCount = jdbcTemplate.queryForObject(countIndustriesSql, Map.of(), Integer.class);
+        
         mockMvc.perform(get("/industry/all"))
-            .andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.size()").value(105));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size()").value(initialCount));
     }
 
     @Test
     void deleteIndustryTest() throws Exception {
-        jdbcTemplate.update("INSERT INTO contractor (id, parent_id, name, " +
-            " name_full, inn, ogrn, country, industry, org_form) " +
-            " VALUES ('id1', NULL, 'ilya', 'ilya bobkov', '123', '12345', 'ABH', '51', '51')");
+        String insertContractorSql = """
+            INSERT INTO contractor (id, parent_id, name, name_full, inn, ogrn, country, industry, org_form, is_active)
+            VALUES (:id, NULL, :name, :nameFull, :inn, :ogrn, :country, :industry, :orgForm, true)
+            """;
+            
+        String checkIndustrySql = "SELECT is_active FROM industry WHERE id = :id";
+        String checkContractorSql = "SELECT is_active FROM contractor WHERE industry = :industry";
+
+        jdbcTemplate.update(insertContractorSql, Map.of(
+            "id", "id1",
+            "name", "ilya",
+            "nameFull", "ilya bobkov",
+            "inn", "123",
+            "ogrn", "12345",
+            "country", "ABH",
+            "industry", 51,
+            "orgForm", 1
+        ));
 
         mockMvc.perform(delete("/industry/delete/51"))
-            .andExpect(status().is2xxSuccessful());
+            .andExpect(status().isNoContent());
 
-        Boolean testResult1 = jdbcTemplate.queryForObject(
-            "SELECT is_active FROM industry WHERE id = '51'",
-            Boolean.class);
+        Boolean isIndustryActive = jdbcTemplate.queryForObject(
+            checkIndustrySql,
+            Map.of("id", 51),
+            Boolean.class
+        );
+        
+        Boolean isContractorActive = jdbcTemplate.queryForObject(
+            checkContractorSql,
+            Map.of("industry", 51),
+            Boolean.class
+        );
 
-        Boolean testResult2 = jdbcTemplate.queryForObject(
-        "SELECT is_active FROM contractor WHERE industry = '51'",
-        Boolean.class);
-
-        assertFalse(testResult1);
-        assertFalse(testResult2);
+        assertFalse(isIndustryActive);
+        assertFalse(isContractorActive);
     }
+
 }

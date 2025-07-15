@@ -3,12 +3,15 @@ package com.contractor.controller.CountryTest;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,7 +29,7 @@ public class CountryIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Container
     private final static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:17"));
@@ -69,23 +72,53 @@ public class CountryIntegrationTest {
     }
 
     @Test
-    void deletCountryTest() throws Exception {
-        jdbcTemplate.update("INSERT INTO contractor (id, parent_id, name, " +
-            " name_full, inn, ogrn, country, industry, org_form) " +
-            " VALUES ('id1', NULL, 'ilya', 'ilya bobkov', '123', '12345', 'ABH', '1', '1')");
+    void deleteCountryTest() throws Exception {
+        String sql = """
+                INSERT INTO country (id, name, is_active) VALUES (:id, :name, true)
+                """;
+        jdbcTemplate.update(
+            sql,  Map.of("id", "Ru", "name", "Rus")
+        );
+        
+        String sql2 = """
+            INSERT INTO contractor (id, parent_id, name, name_full, inn, ogrn, country, industry, org_form, is_active)
+            VALUES (:id, NULL, :name, :nameFull, :inn, :ogrn, :country, :industry, :orgForm, true)
+            """;
+        jdbcTemplate.update(
+            sql2,
+            Map.of(
+                "id", "id1",
+                "name", "ilya",
+                "nameFull", "ilya bobkov",
+                "inn", "123",
+                "ogrn", "12345",
+                "country", "Ru",
+                "industry", 1,
+                "orgForm", 1
+            )
+        );
 
-        mockMvc.perform(delete("/country/delete/ABH"))
-            .andExpect(status().is2xxSuccessful());
+        mockMvc.perform(delete("/country/delete/Ru"))
+            .andExpect(status().isNoContent());
 
-        Boolean testResult = jdbcTemplate.queryForObject(
-            "SELECT is_active FROM country WHERE id = 'ABH'",
-            Boolean.class);
+        String sql3 = """
+                SELECT is_active FROM country WHERE id = :id
+                """;
+        Boolean isCountryActive = jdbcTemplate.queryForObject(
+            sql3,
+            Map.of("id", "Ru"),
+            Boolean.class
+        );
+        assertFalse(isCountryActive);
 
-        Boolean testResultContractor = jdbcTemplate.queryForObject(
-            "SELECT is_active FROM contractor WHERE country = 'ABH'",
-            Boolean.class);
-
-        assertFalse(testResult);
-        assertFalse(testResultContractor);
+        String sql4 = """
+                SELECT is_active FROM contractor WHERE country = :country
+                """;
+        Boolean isContractorActive = jdbcTemplate.queryForObject(
+            sql4,
+            Map.of("country", "Ru"),
+            Boolean.class
+        );
+        assertFalse(isContractorActive);
     }
 }
