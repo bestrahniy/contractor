@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: load-country-data
+      author: ilya
+      changes:
+        - loadData:
+            file: classpath:db/changelog/data/country.csv
+            tableName: country
+            encoding: UTF-8
+            separator: ";"
+            columns:
+              - column:
+                  name: id
+                  type: text
+              - column:
+                  name: name
+                  type: text
+              - column:
+                  name: is_active
+                  type: boolean
+
+        - loadData:
+            file: classpath:db/changelog/data/industry.csv
+            tableName: industry
+            encoding: UTF-8
+            separator: ";"
+            columns:
+              - column:
+                  name: id
+                  type: serial
+              - column:
+                  name: name
+                  type: text
+              - column:
+                  name: is_active
+                  type: boolean
+
+        - loadData:
+            file: classpath:db/changelog/data/org_form.csv
+            tableName: org_form
+            encoding: UTF-8
+            separator: ";"
+            columns:
+              - column:
+                  name: id
+                  type: serial
+              - column:
+                  name: name
+                  type: text
+              - column:
+                  name: is_active
+                  type: boolean

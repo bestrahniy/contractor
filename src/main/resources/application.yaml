@@ -1,0 +1,33 @@
+server:
+    port: 8082
+
+spring:
+    application: 
+        name: contractor
+    
+    datasource:
+        url: ${SPRING_DATASOURCE_URL}
+        username: ${SPRING_DATASOURCE_USERNAME}
+        password: ${SPRING_DATASOURCE_PASSWORD}
+
+    liquibase:
+        enabled: true
+        change-log: classpath:db/changelog/db.changelog-master.yaml
+    
+    sql:
+        init:
+            mode: always
+
+logging:
+    pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} %X{spring.application.name} [%thread] %-5level %logger{36} - %msg%n"
+
+springdoc:
+    api-docs:
+        path: /api-docs
+        packages-to-scan:
+        - com.contractor.controllers
+
+    swagger-ui:
+        path: /swagger-ui.html
+        url: /api-docs/swagger-config
