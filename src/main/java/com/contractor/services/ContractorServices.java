@@ -1,27 +1,32 @@
 package com.contractor.services;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.contractor.dto.GetContactorByIdDto;
 import com.contractor.dto.GetPaginationDto;
 import com.contractor.dto.SaveContractorDto;
 import com.contractor.dto.SearchContractorRequestDto;
+import com.contractor.dto.UserRolesAddDto;
+import com.contractor.exeption.MissingUserRight;
 import com.contractor.mapper.ContractorSaveDtoMapper;
 import com.contractor.mapper.GetContractorByIdMapper;
 import com.contractor.model.Contractor;
-import com.contractor.model.Country;
-import com.contractor.model.Industry;
-import com.contractor.model.OrgForm;
 import com.contractor.repository.ContractorRepository;
-import com.contractor.repository.CountryRepository;
-import com.contractor.repository.IndustryRepositiry;
-import com.contractor.repository.OrgFormRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -33,12 +38,6 @@ public class ContractorServices {
 
     private final ContractorRepository contractorRepository;
 
-    private final CountryRepository countryRepository;
-
-    private final IndustryRepositiry industryRepositiry;
-
-    private final OrgFormRepository orgFormRepository;
-
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private final ContractorSaveDtoMapper saveContractorDtoMapper;
@@ -46,6 +45,11 @@ public class ContractorServices {
     private final JdbcAggregateTemplate jdbcAggregateTemplate;
 
     private final GetContractorByIdMapper getContractorByIdMapper;
+
+    private List<GetContactorByIdDto> availableContractorByRole = new ArrayList<>();
+
+    private final ConnectAuthService connectAuthService;
+
     /**
      * checkeng all related entity if
      * at least one entity is missing object will not save
@@ -77,29 +81,11 @@ public class ContractorServices {
         Contractor contractor = contractorRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Contructor not found"));
 
-        Country country = null;
-        Industry industry = null;
-        OrgForm orgForm = null;
-        if (contractor.getCountry() != null) {
-            country = countryRepository.findById(contractor.getCountry())
-                .orElseThrow(() -> new IllegalArgumentException("Country not found"));
-        }
-
-        if (contractor.getIndustry() != null) {
-            industry = industryRepositiry.findById(contractor.getIndustry())
-                .orElseThrow(() -> new IllegalArgumentException("Industry not found"));
-        }
-
-        if (contractor.getOrgForm() != null) {
-            orgForm = orgFormRepository.findById(contractor.getOrgForm())
-                .orElseThrow(() -> new IllegalArgumentException("org form not found"));
-        }
-
         if (!contractor.isActive()) {
             throw new IllegalArgumentException("contractor is not active");
         }
 
-        return getContractorByIdMapper.getContractorByIdMapping(contractor, industry, country, orgForm);
+        return getContractorByIdMapper.getMapping(contractor);
     }
 
     /**
@@ -123,12 +109,13 @@ public class ContractorServices {
      * @return List of entity
      */
     @Transactional
+    @PostFilter("!hasRole('CONTRACTOR_RUS') or filterObject.country == 'RUS'")
     public List<GetPaginationDto> getAllContractorPagination(int page, int size) {
 
         int offset = page * size;
 
         String sql = "SELECT id, parent_id, name, name_full, inn, ogrn, country, industry, org_form "
-            + " FROM contractor id LIMIT :limit OFFSET :offset";
+                + " FROM contractor LIMIT :limit OFFSET :offset";
 
         Map<String, Object> params = Map.of(
         "limit", size,
@@ -153,22 +140,21 @@ public class ContractorServices {
     /**
      * this method create a sql query for searching Object
      * by custom filter, it add custom filter into main sql and
-     * ready sql is execute, getting data show on screen using pagination
+     * ready sql is execute
      * @param searchContravtorRequestDto dto with params for searching
      * @param size max count object on screen
      * @param page count page
      * @return list of entity
      */
+    @PostFilter("!hasRole('CONTRACTOR_RUS') or filterObject.country == 'RUS'")
     public List<GetPaginationDto> searchContractors(
-            SearchContractorRequestDto searchContractorRequestDto,
-            Integer size,
-            Integer page) {
+            SearchContractorRequestDto searchContractorRequestDto) {
 
         StringBuilder sql = new StringBuilder("SELECT * FROM contractor " +
-                                        "FULL JOIN country ON contractor.country = country.id " +
-                                        "FULL JOIN industry ON contractor.industry = industry.id " +
-                                        "FULL JOIN org_form ON contractor.org_form = org_form.id " +
-                                        "WHERE country.is_active = true");
+                                            "FULL JOIN country ON contractor.country = country.id " +
+                                            "FULL JOIN industry ON contractor.industry = industry.id " +
+                                            "FULL JOIN org_form ON contractor.org_form = org_form.id " +
+                                            "WHERE country.is_active = true");
         Map<String, Object> param = new HashMap<>();
 
         if (searchContractorRequestDto.getId() != null) {
@@ -229,6 +215,64 @@ public class ContractorServices {
         );
 
         return list;
+    }
+
+    /**
+     *
+     * @param roles
+     * @return
+     */
+    public List<GetContactorByIdDto> getAllDeals(Collection<? extends GrantedAuthority> roles) {
+        if (hasRoles(roles, "ROLE_CONTRACTOR_RUS")) {
+            availableContractorByRole = contractorRepository.findAllByCountry("RUS").stream()
+                .map(getContractorByIdMapper::getMapping)
+                .collect(Collectors.toList());
+            return availableContractorByRole;
+        }
+        availableContractorByRole = contractorRepository.findAll().stream()
+            .map(getContractorByIdMapper::getMapping)
+            .collect(Collectors.toList());
+        return availableContractorByRole;
+    }
+
+    /**
+     * save new roles, connect with auth service and getting new jwt
+     * @param userRolesAddDto dto with login and set user roles
+     * @param adminJwt admin token
+     * @return connect to auth service
+     */
+    public String saveNewRoleUser(UserRolesAddDto userRolesAddDto, String adminJwt) {
+        return connectAuthService.connectAuthService(adminJwt, userRolesAddDto);
+    }
+
+    /**
+     * geting all roles from token and collect in set
+     * @param login user
+     * @return set with roles
+     */
+    public Set<String> checkRolesUser(String login) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!login.equals(auth.getName())) {
+            throw new MissingUserRight(login);
+        }
+        return auth.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .map(role -> role.startsWith("ROLE_")
+                ? role.substring("ROLE_".length())
+                : role)
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * check that unique role contains in token
+     * @param roles set roles from token
+     * @param role need roles
+     * @return true, if roles contains role
+     */
+    public boolean hasRoles(Collection<? extends GrantedAuthority> roles, String role) {
+        return roles.stream()
+            .anyMatch(getRole -> getRole.getAuthority().equals(role));
     }
 
 }
