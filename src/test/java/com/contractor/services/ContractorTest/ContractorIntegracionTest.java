@@ -1,6 +1,5 @@
 package com.contractor.services.ContractorTest;
 
-
 import static org.junit.Assert.*;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,9 +15,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import com.contractor.dto.GetContactorByIdDto;
 import com.contractor.dto.SaveContractorDto;
-import com.contractor.dto.SearchContractorRequestDto;
 import com.contractor.services.ContractorServices;
-
 
 @SpringBootTest
 @Testcontainers
