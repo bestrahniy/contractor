@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.contractor.dto.GetContactorByIdDto;
 import com.contractor.dto.GetPaginationDto;
 import com.contractor.dto.SaveContractorDto;
@@ -167,7 +166,7 @@ public class ContractorContoller {
     @PostMapping("/search")
     public ResponseEntity<List<GetPaginationDto>> postMethodName(
         @RequestBody SearchContractorRequestDto searchContravtorRequestDto) {
-        return ResponseEntity.ok(contractorServices.searchContractors(searchContravtorRequestDto, 10, 0));
+        return ResponseEntity.ok(contractorServices.searchContractors(searchContravtorRequestDto));
     }
 
 }
