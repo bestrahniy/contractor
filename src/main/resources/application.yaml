@@ -31,7 +31,3 @@ springdoc:
 security:
     jwt:
         secret_key: b55a3f4a6400c4ef85c16187653713004986bace196af0d78c24b0d1ca26cd9a
-    oauth2:
-        resourceserver:
-            jwt:
-                jwk-set-uri: http://localhost:8082/.well-known/jwks.json

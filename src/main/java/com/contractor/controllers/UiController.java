@@ -2,6 +2,7 @@ package com.contractor.controllers;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,6 +46,10 @@ public class UiController {
             @ApiResponse(responseCode = "500", description = "server is badly")
         }
     )
+    @PreAuthorize("""
+            hasRole('USER') or hasRole('CONTRACTOR_RUS') or hasRole('CONTRACTOR_SUPERUSER')
+            or hasRole('ADMIN') or hasRole('SUPERUSER')
+            """)
     @GetMapping("/contractor/deals")
     public ResponseEntity<?> getAllDeals() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -66,6 +71,7 @@ public class UiController {
             @ApiResponse(responseCode = "500", description = "server is badly")
         }
     )
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/contractor/user-roles/save")
     public ResponseEntity<?> saveNewRole(
         @RequestBody UserRolesAddDto userRolesAddDto,
@@ -84,6 +90,10 @@ public class UiController {
             @ApiResponse(responseCode = "500", description = "server is badly")
         }
     )
+    @PreAuthorize("""
+            hasRole('USER') or hasRole('CONTRACTOR_RUS') or hasRole('CONTRACTOR_SUPERUSER')
+            or hasRole('ADMIN') or hasRole('SUPERUSER')
+            """)
     @GetMapping("/contractor/user-roles/{login}")
     public ResponseEntity<?> getMethodName(@PathVariable String login) {
         return ResponseEntity.ok(contractorServices.checkRolesUser(login));
@@ -99,6 +109,7 @@ public class UiController {
             @ApiResponse(responseCode = "500", description = "server is badly")
         }
     )
+    @PreAuthorize("hasRole('CONTRACTOR_SUPERUSER') or hasRole('SUPERUSER')")
     @PutMapping("/save")
     public ResponseEntity<?> saveContructor(
         @RequestBody SaveContractorDto saveContractorDto) {
@@ -116,6 +127,10 @@ public class UiController {
             @ApiResponse(responseCode = "500", description = "server is badly")
         }
     )
+    @PreAuthorize("""
+            hasRole('USER') or hasRole('CONTRACTOR_RUS')
+            or hasRole('CONTRACTOR_SUPERUSER') or hasRole('SUPERUSER')
+            """)
     @GetMapping("/{id}")
     public ResponseEntity<GetContactorByIdDto> getContructorById(@PathVariable String id) {
         GetContactorByIdDto getContractor = contractorServices.getContractorById(id);
@@ -136,6 +151,7 @@ public class UiController {
             @ApiResponse(responseCode = "500", description = "server is badly")
         }
     )
+    @PreAuthorize("hasRole('CONTRACTOR_SUPERUSER') or hasRole('SUPERUSER')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteContractor(
         @Parameter(
@@ -158,6 +174,10 @@ public class UiController {
             @ApiResponse(responseCode = "500", description = "server is badly")
         }
     )
+    @PreAuthorize("""
+            hasRole('USER') or hasRole('CONTRACTOR_RUS')
+            or hasRole('CONTRACTOR_SUPERUSER') or hasRole('SUPERUSER')
+            """)
     @GetMapping("/all/{page}/{size}")
     public ResponseEntity<List<GetPaginationDto>> getAllContractor(
         @PathVariable Integer page,
@@ -175,6 +195,10 @@ public class UiController {
             @ApiResponse(responseCode = "500", description = "server is badly")
         }
     )
+    @PreAuthorize("""
+            hasRole('USER') or hasRole('CONTRACTOR_RUS')
+            or hasRole('CONTRACTOR_SUPERUSER') or hasRole('SUPERUSER')
+            """)
     @PostMapping("/search")
     public ResponseEntity<List<GetPaginationDto>> postMethodName(
         @RequestBody SearchContractorRequestDto searchContravtorRequestDto) {

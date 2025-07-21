@@ -9,8 +9,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-import javax.print.attribute.standard.MediaTray;
-
 import org.apache.commons.codec.DecoderException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,9 +30,6 @@ import com.contractor.services.ContractorServices;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.auth.AuthStateCacheable;
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.ContentType;
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
